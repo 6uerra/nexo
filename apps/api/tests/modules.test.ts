@@ -5,10 +5,8 @@ const SUPER_EMAIL = process.env.SEED_SUPERADMIN_EMAIL ?? 'admin@nexo.local';
 const SUPER_PASS = process.env.SEED_SUPERADMIN_PASSWORD ?? 'NexoAdmin2026!';
 const ADMIN_EMAIL = 'admin@demo.local';
 const ADMIN_PASS = 'Demo2026!';
-const VIEWER_EMAIL = 'viewer@demo.local';
-const VIEWER_PASS = 'Viewer2026!';
 
-describe('modules toggle (solo super-admin)', () => {
+describe('modules toggle (solo Admin)', () => {
   beforeAll(async () => {
     await waitForApi();
   });
@@ -58,17 +56,7 @@ describe('modules toggle (solo super-admin)', () => {
     expect(r.status).toBe(403);
   });
 
-  it('VIEWER no puede togglear módulos (403)', async () => {
-    const cookie = await login(VIEWER_EMAIL, VIEWER_PASS);
-    const r = await http('/modules/00000000-0000-0000-0000-000000000000', {
-      method: 'PUT',
-      cookie,
-      json: { moduleKey: 'reports', enabled: false },
-    });
-    expect(r.status).toBe(403);
-  });
-
-  it('SUPER ADMIN: rechaza moduleKey inválida con 400', async () => {
+  it('ADMIN: rechaza moduleKey inválida con 400', async () => {
     const cookie = await login(SUPER_EMAIL, SUPER_PASS);
     const me = await login(ADMIN_EMAIL, ADMIN_PASS).then(async (c) => {
       const r = await http('/auth/me', { cookie: c });

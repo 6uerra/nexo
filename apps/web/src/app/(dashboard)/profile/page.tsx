@@ -56,7 +56,7 @@ export default function ProfilePage() {
       {me && (
         <div className="card p-3 text-xs">
           <p><strong>Email:</strong> {me.email}</p>
-          <p><strong>Rol:</strong> <span className="capitalize">{me.role.replace('_', ' ')}</span></p>
+          <p><strong>Rol:</strong> {me.role === 'super_admin' ? 'Admin' : 'Cliente'}</p>
         </div>
       )}
 

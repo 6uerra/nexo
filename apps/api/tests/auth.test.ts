@@ -20,7 +20,7 @@ describe('auth', () => {
     expect(r.data.error).toBe('validation_error');
   });
 
-  it('login del super admin devuelve sesión y cookie', async () => {
+  it('login de Admin devuelve sesión y cookie', async () => {
     const r = await http('/auth/login', { method: 'POST', json: { email: SUPER_EMAIL, password: SUPER_PASS } });
     expect(r.status).toBe(200);
     expect(r.data.session.role).toBe('super_admin');

@@ -36,7 +36,7 @@ async function main() {
   // 2. Super admin
   const superEmail = process.env.SEED_SUPERADMIN_EMAIL ?? 'admin@nexo.local';
   const superPass = process.env.SEED_SUPERADMIN_PASSWORD ?? 'NexoAdmin2026!';
-  const superName = process.env.SEED_SUPERADMIN_NAME ?? 'Super Admin';
+  const superName = process.env.SEED_SUPERADMIN_NAME ?? 'Admin';
   const existingUser = await db.select().from(users).where(eq(users.email, superEmail)).limit(1);
   if (existingUser.length === 0) {
     const passwordHash = await bcrypt.hash(superPass, 10);
@@ -90,19 +90,8 @@ async function main() {
       tenantId: demoTenantId,
       email: 'admin@demo.local',
       passwordHash: adminPass,
-      name: 'Admin Demo',
+      name: 'Cliente Demo',
       role: 'tenant_admin',
-      isActive: true,
-      emailVerified: true,
-    });
-
-    const viewerPass = await bcrypt.hash('Viewer2026!', 10);
-    await db.insert(users).values({
-      tenantId: demoTenantId,
-      email: 'viewer@demo.local',
-      passwordHash: viewerPass,
-      name: 'Viewer Demo',
-      role: 'tenant_viewer',
       isActive: true,
       emailVerified: true,
     });
@@ -118,8 +107,7 @@ async function main() {
       });
     }
 
-    console.log('  ✔ Tenant demo + admin@demo.local / Demo2026!');
-    console.log('  ✔ Tenant demo + viewer@demo.local / Viewer2026!');
+    console.log('  ✔ Cliente demo: admin@demo.local / Demo2026!');
   } else {
     demoTenantId = existingDemo[0]!.id;
     console.log('  ↺ Tenant demo ya existía');

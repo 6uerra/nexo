@@ -74,7 +74,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               <tr key={u.id}>
                 <td className="px-4 py-2.5 font-medium">{u.name}</td>
                 <td className="px-4 py-2.5 text-muted">{u.email}</td>
-                <td className="px-4 py-2.5"><span className="rounded-full bg-background px-2 py-0.5 text-xs">{u.role}</span></td>
+                <td className="px-4 py-2.5"><span className="rounded-full bg-background px-2 py-0.5 text-xs">{u.role === 'super_admin' ? 'Admin' : 'Cliente'}</span></td>
                 <td className="px-4 py-2.5">
                   {u.emailVerified
                     ? <span className="inline-flex items-center gap-1 text-xs text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600"/>Activo</span>

@@ -49,7 +49,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const r = await api<{ session: AuthSession }>('/auth/login', { method: 'POST', json: parsed.data });
-      if (r.session.role === 'super_admin') router.push('/admin');
+      if (r.session.role === 'super_admin') router.push('/admin/clients');
       else if (!r.session.tenantId) router.push('/onboarding');
       else router.push('/dashboard');
     } catch (e: any) {
@@ -119,8 +119,8 @@ export default function LoginPage() {
               type="button"
               onClick={() => quickLogin('admin')}
               disabled={quickBusy !== null}
-              aria-label="Entrar como admin"
-              title="Entrar como admin"
+              aria-label="Entrar como Admin"
+              title="Entrar como Admin (control total)"
               className="group inline-flex h-7 w-7 items-center justify-center rounded-md text-muted/60 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors disabled:opacity-30"
             >
               {quickBusy === 'admin'
@@ -131,8 +131,8 @@ export default function LoginPage() {
               type="button"
               onClick={() => quickLogin('user')}
               disabled={quickBusy !== null}
-              aria-label="Entrar como usuario"
-              title="Entrar como usuario"
+              aria-label="Entrar como Cliente"
+              title="Entrar como Cliente (empresa)"
               className="group inline-flex h-7 w-7 items-center justify-center rounded-md text-muted/60 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors disabled:opacity-30"
             >
               {quickBusy === 'user'

@@ -36,8 +36,8 @@ export default async function AdminPage() {
   return (
     <div className="max-w-5xl space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Panel del Super Admin</h1>
-        <p className="text-sm text-muted">Gestión de tenants (intermediarios) y plataforma.</p>
+        <h1 className="text-2xl font-bold tracking-tight">Panel de Admin</h1>
+        <p className="text-sm text-muted">Gestión de clientes y plataforma.</p>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">

@@ -39,20 +39,4 @@ describe('subscriptions', () => {
     expect(r.data.payment.status).toBe('submitted');
   });
 
-  it('viewer no puede registrar pagos', async () => {
-    const cookie = await login('viewer@demo.local', 'Viewer2026!');
-    const now = new Date();
-    const next = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const r = await http('/subscriptions/me/payments', {
-      method: 'POST',
-      cookie,
-      json: {
-        amountCop: 50000,
-        method: 'bank_transfer',
-        coversFrom: now.toISOString(),
-        coversTo: next.toISOString(),
-      },
-    });
-    expect(r.status).toBe(403);
-  });
 });

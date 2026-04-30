@@ -97,7 +97,7 @@ export function NavSidebar({
         <div className="border-t border-border p-3 space-y-1">
           {session.role === 'super_admin' && (
             <>
-              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted">Super Admin</p>
+              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted">Admin</p>
               <Link href="/admin/clients" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
                 <Briefcase className="h-4 w-4" /><span>Clientes</span>
               </Link>

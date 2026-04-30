@@ -8,6 +8,20 @@
       "when": 1777511543741,
       "tag": "0000_late_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777514093050,
+      "tag": "0001_illegal_kabuki",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777514697941,
+      "tag": "0002_eager_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

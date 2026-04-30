@@ -6,4 +6,6 @@ export * from './notifications';
 export * from './audit';
 export * from './payments';
 export * from './media';
+export * from './email-log';
+export * from './plans';
 export * from './sprint2-placeholders';

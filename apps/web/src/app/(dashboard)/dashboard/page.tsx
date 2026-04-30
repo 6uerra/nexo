@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Truck, Users, ShieldCheck, Building2, FileSignature, AlertTriangle, Wallet, Calendar } from 'lucide-react';
 import { KpiCard } from '@/components/kpi-card';
+import { PlanBanner } from '@/components/plan-banner';
 import { formatCop } from '@/lib/utils';
 
 async function getKpis() {
@@ -25,29 +26,47 @@ async function getSubscription() {
     cache: 'no-store',
   });
   if (!r.ok) return null;
-  return (await r.json()) as { subscription: { status: string; currentPeriodEnd: string; blockAt: string } | null };
+  return (await r.json()) as { subscription: { status: string; plan: string; currentPeriodEnd: string; blockAt: string } | null };
+}
+
+async function getModulesCount() {
+  const c = await cookies();
+  const token = c.get(process.env.SESSION_COOKIE_NAME ?? 'nexo_session')?.value;
+  const apiUrl = process.env.API_URL ?? 'http://localhost:3001';
+  const r = await fetch(`${apiUrl}/api/v1/modules`, {
+    headers: { cookie: `${process.env.SESSION_COOKIE_NAME ?? 'nexo_session'}=${token}` },
+    cache: 'no-store',
+  });
+  if (!r.ok) return { active: 0, total: 10 };
+  const data = await r.json();
+  const list = data.modules as Array<{ enabled: boolean }>;
+  return { active: list.filter((m) => m.enabled).length, total: list.length || 10 };
 }
 
 export default async function DashboardPage() {
   const data = await getKpis();
   const subData = await getSubscription();
+  const mods = await getModulesCount();
   const k = data?.kpis ?? { vehicles: 0, drivers: 0, owners: 0, clients: 0, activeContracts: 0, revenueMonthCop: 0, upcomingExpirations: 0 };
   const sub = subData?.subscription;
+  const daysLeft = sub ? Math.max(0, Math.ceil((new Date(sub.currentPeriodEnd).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : 0;
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted">Vista general de tu operación</p>
-        </div>
-        {sub && sub.status !== 'active' && (
-          <Link href="/settings/subscription" className="inline-flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors">
-            <AlertTriangle className="h-4 w-4" />
-            Suscripción {sub.status === 'trial' ? 'en prueba' : sub.status === 'past_due' ? 'por vencer' : sub.status}
-          </Link>
-        )}
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted">Vista general de tu operación</p>
       </header>
+
+      {sub && (
+        <PlanBanner
+          plan={sub.plan}
+          status={sub.status}
+          daysLeft={daysLeft}
+          modulesActive={mods.active}
+          modulesTotal={mods.total}
+        />
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Vehículos" value={k.vehicles ?? 0} icon={Truck} />

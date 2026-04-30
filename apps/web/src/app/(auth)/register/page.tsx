@@ -1,153 +1,95 @@
 'use client';
-import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Logo } from '@/components/logo';
-import { api } from '@/lib/api';
-import { registerSchema, type AuthSession } from '@nexo/shared';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Send, CheckCircle2 } from 'lucide-react';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [form, setForm] = useState({
-    tenantName: '',
-    tenantSlug: '',
-    adminName: '',
-    email: '',
-    password: '',
-    acceptTerms: false,
-    acceptHabeasData: false,
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', company: '', message: '' });
 
-  function onChange<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
-    setForm((f) => {
-      const next = { ...f, [k]: v };
-      if (k === 'tenantName' && typeof v === 'string') {
-        next.tenantSlug = slugify(v);
-      }
-      return next;
-    });
-  }
-
-  function slugify(s: string): string {
-    return s
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 64) || 'cuenta';
-  }
-
-  async function trySubmit(payload: typeof form, attempt = 0): Promise<void> {
-    const tryPayload = attempt === 0
-      ? payload
-      : { ...payload, tenantSlug: `${payload.tenantSlug}-${Math.floor(Math.random() * 9000) + 1000}` };
-    try {
-      await api<{ session: AuthSession }>('/auth/register', { method: 'POST', json: tryPayload });
-      router.push('/onboarding');
-    } catch (e: any) {
-      // Si el slug ya existe, reintentar una vez con sufijo aleatorio (transparente para el usuario)
-      if (attempt === 0 && e?.status === 409 && /identificador|slug|empresa/i.test(e?.message ?? '')) {
-        return trySubmit(payload, 1);
-      }
-      throw e;
-    }
-  }
-
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    const parsed = registerSchema.safeParse(form);
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Datos inválidos');
-      return;
-    }
-    setLoading(true);
-    try {
-      await trySubmit(parsed.data);
-    } catch (e: any) {
-      setError(e?.message ?? 'Error al crear cuenta');
-    } finally {
-      setLoading(false);
-    }
+    const subject = encodeURIComponent('Solicitud de acceso a Nexo');
+    const body = encodeURIComponent(
+      `Hola,\n\nMe interesa probar Nexo.\n\n` +
+      `Nombre: ${form.name}\nEmpresa: ${form.company}\nCorreo: ${form.email}\n\n` +
+      `${form.message}\n\nGracias.`
+    );
+    window.location.href = `mailto:admin@nexo.local?subject=${subject}&body=${body}`;
+    setSubmitted(true);
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <Logo />
           </Link>
         </div>
-        <div className="card p-7">
-          <h1 className="text-2xl font-bold tracking-tight">Crea tu cuenta</h1>
-          <p className="mt-1 text-sm text-muted">30 días gratis · Sin tarjeta</p>
 
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
-            <div>
-              <label className="label">Nombre de tu empresa</label>
-              <input className="input" required value={form.tenantName}
-                onChange={(e) => onChange('tenantName', e.target.value)}
-                placeholder="Tu empresa" autoComplete="organization" />
+        {submitted ? (
+          <div className="card p-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <CheckCircle2 className="h-7 w-7" />
             </div>
-            <div>
-              <label className="label">Tu nombre</label>
-              <input className="input" required value={form.adminName}
-                onChange={(e) => onChange('adminName', e.target.value)}
-                placeholder="Tu nombre completo" autoComplete="name" />
+            <h1 className="mt-4 text-xl font-bold">¡Solicitud enviada!</h1>
+            <p className="mt-2 text-sm text-muted">
+              Te contactaremos en menos de 24h con tus credenciales de acceso.
+            </p>
+            <Link href="/" className="btn-outline mt-6 text-sm">Volver al inicio</Link>
+          </div>
+        ) : (
+          <div className="card p-7">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
+              <Mail className="h-3.5 w-3.5" />
+              Acceso por invitación
             </div>
-            <div>
-              <label className="label">Correo</label>
-              <input className="input" type="email" required value={form.email}
-                onChange={(e) => onChange('email', e.target.value)}
-                placeholder="tu@correo.com" autoComplete="email" />
-            </div>
-            <div>
-              <label className="label">Contraseña</label>
-              <input className="input" type="password" required value={form.password}
-                onChange={(e) => onChange('password', e.target.value)}
-                placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Solicita tu acceso</h1>
+            <p className="mt-1 text-sm text-muted">
+              Por ahora Nexo es por invitación. Cuéntanos de ti y te activamos un trial de 30 días personalizado.
+            </p>
 
-            <div className="space-y-2 pt-2">
-              <label className="flex items-start gap-2 text-sm cursor-pointer">
-                <input type="checkbox" required checked={form.acceptTerms}
-                  onChange={(e) => onChange('acceptTerms', e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-border text-primary cursor-pointer" />
-                <span className="text-muted">Acepto los <a href="#" className="text-primary underline">Términos y Condiciones</a></span>
-              </label>
-              <label className="flex items-start gap-2 text-sm cursor-pointer">
-                <input type="checkbox" required checked={form.acceptHabeasData}
-                  onChange={(e) => onChange('acceptHabeasData', e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-border text-primary cursor-pointer" />
-                <span className="text-muted">Acepto la <a href="#" className="text-primary underline">Política de tratamiento de datos</a> (Ley 1581/2012)</span>
-              </label>
-            </div>
-
-            {error && (
-              <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>{error}</span>
+            <form onSubmit={onSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="label">Tu nombre</label>
+                <input className="input" required value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Tu nombre completo" autoComplete="name" />
               </div>
-            )}
+              <div>
+                <label className="label">Empresa</label>
+                <input className="input" required value={form.company}
+                  onChange={(e) => setForm({ ...form, company: e.target.value })}
+                  placeholder="Nombre de tu empresa" autoComplete="organization" />
+              </div>
+              <div>
+                <label className="label">Correo</label>
+                <input className="input" type="email" required value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="tu@correo.com" autoComplete="email" />
+              </div>
+              <div>
+                <label className="label">¿Cuántos vehículos manejas?</label>
+                <textarea className="input min-h-[80px]" value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  placeholder="Cuéntanos un poco de tu operación..." />
+              </div>
+              <button type="submit" className="btn-primary w-full">
+                <Send className="h-4 w-4" />
+                Enviar solicitud
+              </button>
+            </form>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Crear cuenta gratis
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="font-semibold text-primary hover:text-primary-700 cursor-pointer">
-              Ingresar
-            </Link>
-          </p>
-        </div>
+            <p className="mt-6 text-center text-sm text-muted">
+              ¿Ya tienes cuenta?{' '}
+              <Link href="/login" className="font-semibold text-primary hover:text-primary-700 cursor-pointer">
+                Ingresar
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

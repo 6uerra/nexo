@@ -76,12 +76,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted">
-            ¿Sin cuenta?{' '}
-            <Link href="/register" className="font-semibold text-primary hover:text-primary-700 cursor-pointer">
-              Crear una nueva
-            </Link>
-          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-sm">
+            <Link href="/forgot-password" className="text-muted hover:text-ink">¿Olvidaste tu contraseña?</Link>
+            <Link href="/register" className="font-semibold text-primary hover:text-primary-700">Solicitar acceso</Link>
+          </div>
+          <div className="mt-4 pt-4 border-t border-border">
+            <Link href="/roadmap" className="text-xs text-muted hover:text-ink">Ver lo que viene en Nexo →</Link>
+          </div>
         </div>
         <p className="mt-6 text-center text-xs text-muted">
           Al ingresar aceptas nuestros{' '}

@@ -4,7 +4,7 @@ loadEnv({ path: resolve(process.cwd(), '../../.env') });
 loadEnv();
 import bcrypt from 'bcryptjs';
 import { getDb, closeDb } from './index.js';
-import { tenants, users, subscriptions, tenantModules, MODULE_KEYS, platformPaymentMethods } from './schema/index.js';
+import { tenants, users, subscriptions, tenantModules, MODULE_KEYS, platformPaymentMethods, platformPlans } from './schema/index.js';
 import { eq } from 'drizzle-orm';
 
 async function main() {
@@ -151,6 +151,91 @@ async function main() {
       },
     ]);
     console.log('  ✔ Métodos de pago seed (Bancolombia + Mercado Pago — edítalos en /admin/payment-methods)');
+  }
+
+  // 5. Planes (editables por super-admin)
+  const existingPlans = await db.select().from(platformPlans).limit(1);
+  if (existingPlans.length === 0) {
+    const ALL = [...MODULE_KEYS] as string[];
+    await db.insert(platformPlans).values([
+      {
+        key: 'free_trial',
+        name: 'Trial',
+        tagline: '30 días para probar todo',
+        priceCop: 0,
+        priceLabel: 'Gratis',
+        showPrice: true,
+        vehicleLimit: 5,
+        modules: ALL,
+        highlights: [
+          '30 días sin tarjeta',
+          'Hasta 5 vehículos',
+          'Todos los módulos activos',
+        ],
+        highlighted: false,
+        sortOrder: 1,
+      },
+      {
+        key: 'standard',
+        name: 'Standard',
+        tagline: 'Para flotas en crecimiento',
+        priceLabel: 'Consultar',
+        showPrice: false,
+        vehicleLimit: 20,
+        modules: ['vehicles', 'drivers', 'owners', 'clients', 'notifications'],
+        highlights: [
+          'Hasta 20 vehículos',
+          'Vehículos, conductores, propietarios',
+          'Empresas cliente',
+          'Notificaciones por email',
+          'Soporte por correo',
+        ],
+        highlighted: false,
+        sortOrder: 2,
+      },
+      {
+        key: 'pro',
+        name: 'Pro',
+        tagline: 'La opción más completa',
+        priceLabel: 'Consultar',
+        showPrice: false,
+        vehicleLimit: 100,
+        modules: ['vehicles', 'drivers', 'owners', 'clients', 'notifications', 'contracts', 'maintenance', 'prospects', 'billing'],
+        highlights: [
+          'Hasta 100 vehículos',
+          'Todo lo de Standard',
+          'Contratos PDF generados',
+          'Mantenimientos con deducción automática',
+          'Facturación cruzada',
+          'Soporte prioritario',
+        ],
+        highlighted: true,
+        sortOrder: 3,
+      },
+      {
+        key: 'enterprise',
+        name: 'Enterprise',
+        tagline: 'A tu medida, con IA',
+        priceLabel: 'Cotización personalizada',
+        showPrice: false,
+        vehicleLimit: null,
+        modules: ALL,
+        highlights: [
+          'Vehículos ilimitados',
+          'Todos los módulos',
+          'Reportes con IA — insights automáticos',
+          'Informes inteligentes con tendencias',
+          'Análisis IA de gastos y rentabilidad',
+          'Integraciones premium opcionales',
+          'WhatsApp Business, API, dominio propio',
+          '(estas integraciones usan herramientas pagas externas)',
+          'Soporte dedicado y SLA',
+        ],
+        highlighted: false,
+        sortOrder: 4,
+      },
+    ]);
+    console.log('  ✔ Planes seed (Trial, Standard, Pro, Enterprise — edítalos en /admin/plans)');
   }
 
   console.log('✅ Seed completo');

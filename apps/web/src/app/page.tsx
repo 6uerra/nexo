@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
+import { LandingPlans } from '@/components/landing-plans';
 import {
   Truck, ShieldCheck, Bell, FileSignature, Wrench, Receipt, ArrowRight,
   CheckCircle2,
@@ -31,12 +32,12 @@ export default function LandingPage() {
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted">
             <a href="#features" className="hover:text-ink transition-colors">Funciones</a>
-            <a href="#benefits" className="hover:text-ink transition-colors">Beneficios</a>
-            <a href="#pricing" className="hover:text-ink transition-colors">Precios</a>
+            <a href="#planes" className="hover:text-ink transition-colors">Planes</a>
+            <Link href="/roadmap" className="hover:text-ink transition-colors">Próximamente</Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link href="/login" className="btn-ghost text-sm">Ingresar</Link>
-            <Link href="/register" className="btn-primary text-sm">Empezar gratis</Link>
+            <Link href="/register" className="btn-primary text-sm">Solicitar acceso</Link>
           </div>
         </div>
       </header>
@@ -61,7 +62,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/register" className="btn-accent text-base px-6 py-3">
-                  Empezar gratis
+                  Solicitar acceso
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link href="/login" className="btn-outline text-base px-6 py-3">
@@ -152,14 +153,17 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Plans */}
+      <LandingPlans />
+
       {/* CTA */}
-      <section id="pricing" className="bg-primary py-20 text-white">
+      <section className="bg-primary py-20 text-white">
         <div className="mx-auto max-w-4xl px-4 lg:px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Empieza hoy. Tu yo del próximo mes te lo va a agradecer.</h2>
           <p className="mt-4 text-primary-100/90">30 días gratis. Sin tarjeta. Cancela cuando quieras.</p>
           <div className="mt-8 flex justify-center">
             <Link href="/register" className="btn-accent text-base px-8 py-3.5">
-              Crear cuenta gratis
+              Solicitar mi acceso
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

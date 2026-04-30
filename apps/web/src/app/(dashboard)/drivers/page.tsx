@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { Users } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { expiryDot } from '@/lib/expiry';
+import { DriverCreateButton, DriverActions } from '@/components/driver-form';
 
 async function load() {
   const c = await cookies();
@@ -19,13 +20,16 @@ export default async function DriversPage() {
   const { drivers } = await load();
   return (
     <div className="max-w-6xl space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          Conductores
-          <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{drivers.length}</span>
-        </h1>
-        <p className="text-sm text-muted">Datos de licencia, EPS, ARL y exámenes médicos.</p>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" />
+            Conductores
+            <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{drivers.length}</span>
+          </h1>
+          <p className="text-sm text-muted">Datos de licencia, EPS, ARL y exámenes médicos.</p>
+        </div>
+        <DriverCreateButton />
       </header>
 
       <div className="card overflow-hidden">
@@ -39,6 +43,7 @@ export default async function DriversPage() {
                 <th>Vence licencia</th>
                 <th>EPS / ARL / Pensión</th>
                 <th>Examen méd.</th>
+                <th></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -75,6 +80,7 @@ export default async function DriversPage() {
                         <span className="tabular-nums">{d.medicalExamExpiresAt ? formatDate(d.medicalExamExpiresAt) : '—'}</span>
                       </span>
                     </td>
+                    <td className="px-4 py-2.5"><DriverActions driver={d} /></td>
                   </tr>
                 );
               })}

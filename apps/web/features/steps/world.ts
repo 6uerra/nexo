@@ -1,14 +1,13 @@
 /**
- * Step definitions en español.
- * Buenas prácticas QA aplicadas:
- * - Page Object Model (selectores centralizados en pages.ts)
- * - Hooks: Before resetea estado conocido por escenario
- * - Steps independientes (no asumen orden)
- * - Steps reutilizables (DRY) con argumentos parametrizados
- * - Spanish-first language para validación con stakeholders
+ * Step definitions en español — versión optimizada.
+ * - Fixtures con storageState pre-cargado por rol (sin UI login en cada test)
+ * - POM (pages.ts)
+ * - Workers paralelos seguros: cada test puede mutar estado vía Given API
+ *   y los Given hacen reset/cambio justo antes del flow
  */
 import { createBdd, test as base } from 'playwright-bdd';
-import { expect, request, type APIRequestContext } from '@playwright/test';
+import { expect, request, type APIRequestContext, type BrowserContext } from '@playwright/test';
+import { resolve } from 'node:path';
 import { LoginPage, Sidebar, AdminClientsPage } from './pages.js';
 
 const API_BASE = process.env.E2E_API_BASE ?? 'http://localhost:3001';
@@ -20,12 +19,24 @@ type Fixtures = {
   loginPage: LoginPage;
   sidebar: Sidebar;
   adminClients: AdminClientsPage;
+  /** Carga la sesión guardada por el global-setup en el contexto del navegador */
+  loadAuth: (role: 'admin' | 'cliente') => Promise<void>;
 };
 
 export const test = base.extend<Fixtures>({
   loginPage: async ({ page }, use) => use(new LoginPage(page)),
   sidebar: async ({ page }, use) => use(new Sidebar(page)),
   adminClients: async ({ page }, use) => use(new AdminClientsPage(page)),
+  loadAuth: async ({ context }, use) => {
+    use(async (role: 'admin' | 'cliente') => {
+      const file = resolve(process.cwd(), '.auth', `${role}.json`);
+      const fs = await import('node:fs/promises');
+      const raw = await fs.readFile(file, 'utf-8');
+      const state = JSON.parse(raw);
+      // Cargar cookies en el contexto vivo
+      if (state.cookies?.length) await context.addCookies(state.cookies);
+    });
+  },
 });
 
 export const { Given, When, Then, Before, After } = createBdd(test);
@@ -44,26 +55,6 @@ async function getDemoTenantId(ctx: APIRequestContext): Promise<string> {
   if (!demo) throw new Error('No se encontró tenant demo');
   return demo.id;
 }
-
-async function loginUI(loginPage: LoginPage, page: any, role: 'admin' | 'cliente') {
-  const u = role === 'admin' ? ADMIN : CLIENT;
-  await loginPage.goto();
-  await loginPage.loginAs(u.email, u.password);
-  await page.waitForURL(
-    (url: URL) => url.pathname.startsWith('/admin') || url.pathname === '/dashboard' || url.pathname === '/blocked' || url.pathname === '/onboarding',
-    { timeout: 15000 },
-  );
-  await page.waitForLoadState('networkidle');
-}
-
-// Reset estado al inicio de cada escenario (tests independientes)
-Before(async () => {
-  const ctx = await adminApi();
-  const tid = await getDemoTenantId(ctx);
-  await ctx.post(`/api/v1/admin/clients/${tid}/set-plan`, { data: { planKey: 'free_trial' } });
-  await ctx.post(`/api/v1/admin/clients/${tid}/set-subscription`, { data: { preset: 'active' } });
-  await ctx.dispose();
-});
 
 // ============ DADO ============
 
@@ -90,8 +81,11 @@ Given('que el admin cambia la suscripción del cliente demo a {string}', async (
   await ctx.dispose();
 });
 
-Given('estoy autenticado como {string}', async ({ loginPage, page }, role: string) => {
-  await loginUI(loginPage, page, role as 'admin' | 'cliente');
+/** Sesión sin UI: usa storageState precargado. Mucho más rápido. */
+Given('estoy autenticado como {string}', async ({ loadAuth, page }, role: string) => {
+  await loadAuth(role as 'admin' | 'cliente');
+  // Aterrizar en una página default según rol
+  await page.goto(role === 'admin' ? '/admin/clients' : '/dashboard');
 });
 
 // ============ CUANDO ============
@@ -102,11 +96,19 @@ When('visito la landing {string}', async ({ page }, path: string) => {
 
 When('visito {string}', async ({ page }, path: string) => {
   await page.goto(path);
-  await page.waitForLoadState('networkidle');
 });
 
-When('inicio sesión como {string}', async ({ loginPage, page }, role: string) => {
-  await loginUI(loginPage, page, role as 'admin' | 'cliente');
+When('inicio sesión como {string}', async ({ loadAuth, page }, role: string) => {
+  // Para escenarios donde el rol cambia a mitad de flujo (ej. set blocked → login):
+  // Recreamos cookies y vamos al destino. Si está bloqueado el middleware redirige.
+  await loadAuth(role as 'admin' | 'cliente');
+  if (role === 'admin') {
+    await page.goto('/admin/clients');
+  } else {
+    await page.goto('/dashboard');
+    // Esperar a que estabilice (puede redirigir a /blocked si la sub está bloqueada)
+    await page.waitForLoadState('domcontentloaded');
+  }
 });
 
 When('completo el campo {string} con {string}', async ({ page }, name: string, value: string) => {
@@ -134,11 +136,6 @@ When('hago click en {string}', async ({ page }, label: string) => {
   await page.getByText(new RegExp(label, 'i')).first().click();
 });
 
-When('visito {string} y espero que cargue', async ({ page }, path: string) => {
-  await page.goto(path);
-  await page.waitForLoadState('networkidle');
-});
-
 When('visito {string} y entro al detalle del cliente demo', async ({ page, adminClients }, path: string) => {
   await page.goto(path);
   await adminClients.detailLink().click();
@@ -148,14 +145,13 @@ When('visito {string} y entro al detalle del cliente demo', async ({ page, admin
 // ============ ENTONCES ============
 
 Then('estoy en la URL {string}', async ({ page }, expectedPath: string) => {
-  // Esperar a que la navegación complete (útil después de click en logout/login)
   await page.waitForURL((u) => u.pathname === expectedPath, { timeout: 10000 }).catch(() => {});
   const url = new URL(page.url());
   expect(url.pathname).toBe(expectedPath);
 });
 
 Then('veo el texto {string}', async ({ page }, text: string) => {
-  await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 8000 });
 });
 
 Then('NO veo el texto {string}', async ({ page }, text: string) => {
@@ -179,7 +175,7 @@ Then('veo el botón {string}', async ({ page }, name: string) => {
 });
 
 Then('veo el mensaje {string}', async ({ page }, text: string) => {
-  await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(new RegExp(text, 'i')).first()).toBeVisible({ timeout: 8000 });
 });
 
 Then('el sidebar contiene {string}', async ({ sidebar }, text: string) => {

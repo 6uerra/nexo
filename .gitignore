@@ -27,3 +27,6 @@ apps/web/.features-gen/
 apps/web/playwright-report/
 apps/web/test-results/
 reports/
+.auth/
+tests-evidencia/
+playwright.evidencia.config.ts

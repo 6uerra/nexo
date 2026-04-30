@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { ShieldCheck } from 'lucide-react';
+import { OwnerCreateButton, OwnerActions } from '@/components/owner-form';
 
 async function load() {
   const c = await cookies();
@@ -17,13 +18,16 @@ export default async function OwnersPage() {
   const { owners } = await load();
   return (
     <div className="max-w-5xl space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-primary" />
-          Propietarios
-          <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{owners.length}</span>
-        </h1>
-        <p className="text-sm text-muted">Dueños de los vehículos con sus datos bancarios para pagos.</p>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+            Propietarios
+            <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{owners.length}</span>
+          </h1>
+          <p className="text-sm text-muted">Dueños de los vehículos con sus datos bancarios para pagos.</p>
+        </div>
+        <OwnerCreateButton />
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -37,9 +41,12 @@ export default async function OwnersPage() {
                 <p className="font-bold">{o.fullName}</p>
                 <p className="text-xs text-muted">{o.documentType} {o.document}</p>
               </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${o.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {o.isActive ? 'Activo' : 'Inactivo'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${o.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                  {o.isActive ? 'Activo' : 'Inactivo'}
+                </span>
+                <OwnerActions owner={o} />
+              </div>
             </div>
             <div className="mt-3 text-xs space-y-1 text-muted">
               <p>📞 {o.phone ?? '—'}</p>

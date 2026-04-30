@@ -3,6 +3,7 @@ import { Truck, Lock } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { expiryDot } from '@/lib/expiry';
 import { LimitBanner } from '@/components/limit-banner';
+import { VehicleCreateButton, VehicleActions } from '@/components/vehicle-form';
 
 async function fetchAll() {
   const c = await cookies();
@@ -35,13 +36,16 @@ export default async function VehiclesPage() {
 
   return (
     <div className="max-w-6xl space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Truck className="h-6 w-6 text-primary" />
-          Vehículos
-          <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{vehicles.length}</span>
-        </h1>
-        <p className="text-sm text-muted">Listado con estado de vencimiento de SOAT, RTM y póliza.</p>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Truck className="h-6 w-6 text-primary" />
+            Vehículos
+            <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{vehicles.length}</span>
+          </h1>
+          <p className="text-sm text-muted">Listado con estado de vencimiento de SOAT, RTM y póliza.</p>
+        </div>
+        <VehicleCreateButton />
       </header>
 
       <LimitBanner resource="vehículos" used={vehicles.length} limit={vehicleLimit} />
@@ -58,6 +62,7 @@ export default async function VehiclesPage() {
                 <th>Tecnomec.</th>
                 <th>Póliza</th>
                 <th>Estado</th>
+                <th></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -114,6 +119,7 @@ export default async function VehiclesPage() {
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-2.5">{!v.blockedByPlan && <VehicleActions vehicle={v} />}</td>
                   </tr>
                 );
               })}

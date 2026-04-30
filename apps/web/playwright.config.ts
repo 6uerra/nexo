@@ -12,7 +12,7 @@ export default defineConfig({
   testDir,
   fullyParallel: false,
   workers: 1,
-  retries: 1,
+  retries: 0,
   globalSetup: './features/global-setup.ts',
   globalTeardown: './features/global-teardown.ts',
   reporter: [
@@ -23,10 +23,10 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
     trace: 'retain-on-failure',
-    screenshot: { mode: 'on', fullPage: false },
+    screenshot: { mode: 'only-on-failure', fullPage: false },
     video: 'retain-on-failure',
-    actionTimeout: 10_000,
-    navigationTimeout: 15_000,
+    actionTimeout: 6_000,
+    navigationTimeout: 10_000,
   },
   projects: [
     {

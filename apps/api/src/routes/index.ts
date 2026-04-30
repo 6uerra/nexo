@@ -11,6 +11,7 @@ import { registerAdminClientsRoutes } from '../admin/clients.routes.js';
 import { registerAdminEmailsRoutes } from '../admin/emails.routes.js';
 import { registerPlansRoutes } from '../admin/plans.routes.js';
 import { registerViewRoutes } from '../views/views.routes.js';
+import { registerCrudRoutes } from '../views/crud.routes.js';
 import { registerAdminSubscriptionPaymentsRoutes } from '../admin/subscription-payments.routes.js';
 
 export async function registerRoutes(app: FastifyInstance) {
@@ -28,6 +29,7 @@ export async function registerRoutes(app: FastifyInstance) {
       await registerAdminEmailsRoutes(api);
       await registerPlansRoutes(api);
       await registerViewRoutes(api);
+      await registerCrudRoutes(api);
       await registerAdminSubscriptionPaymentsRoutes(api);
     },
     { prefix: '/api/v1' },

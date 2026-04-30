@@ -30,11 +30,11 @@ describe('vistas read-only del cliente (data demo)', () => {
     expect(r.data.drivers.length).toBe(5);
   });
 
-  it('GET /owners devuelve 3 propietarios con bankInfo', async () => {
+  it('GET /owners devuelve al menos 3 propietarios con bankInfo', async () => {
     const cookie = await login('admin@demo.local', 'Demo2026!');
     const r = await http('/owners', { cookie });
     expect(r.status).toBe(200);
-    expect(r.data.owners.length).toBe(3);
+    expect(r.data.owners.length).toBeGreaterThanOrEqual(3);
     expect(r.data.owners[0].bankInfo).toBeTruthy();
   });
 

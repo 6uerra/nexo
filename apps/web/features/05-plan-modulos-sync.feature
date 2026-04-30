@@ -44,4 +44,4 @@ Característica: Sincronización Plan ↔ Vistas del Cliente
     Ejemplos: comportamiento del banner de límite
       | plan       | resultado            |
       | free_trial | están bloqueados     |
-      | pro        | Usando 8 de 100      |
+      | pro        | de 100 vehículos     |

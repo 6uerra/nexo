@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { Users } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { expiryDot } from '@/lib/expiry';
+import { expiryDot, expiryStatus } from '@/lib/expiry';
 import { DriverCreateButton, DriverActions } from '@/components/driver-form';
 
 async function load() {
@@ -32,61 +32,80 @@ export default async function DriversPage() {
         <DriverCreateButton />
       </header>
 
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-background text-left text-xs uppercase tracking-wider text-muted">
-              <tr>
-                <th className="px-4 py-2.5">Conductor</th>
-                <th>Documento</th>
-                <th>Licencia</th>
-                <th>Vence licencia</th>
-                <th>EPS / ARL / Pensión</th>
-                <th>Examen méd.</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {drivers.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">Sin conductores aún</td></tr>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {drivers.length === 0 && (
+          <div className="md:col-span-2 lg:col-span-3 card p-12 text-center text-muted">Sin conductores aún</div>
+        )}
+        {drivers.map((d: any) => {
+          const lic = expiryDot(d.licenseExpiresAt);
+          const med = expiryDot(d.medicalExamExpiresAt);
+          const lance = expiryStatus(d.licenseExpiresAt);
+          return (
+            <div key={d.id} className="card p-5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold truncate">{d.fullName}</p>
+                  <p className="text-xs text-muted truncate">{d.documentType} {d.document}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${d.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {d.isActive ? 'Activo' : 'Inactivo'}
+                  </span>
+                  <DriverActions driver={d} />
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                {d.licenseCategory && (
+                  <span className="inline-flex rounded-md bg-primary/10 px-2 py-0.5 font-bold text-primary text-xs">
+                    Lic {d.licenseCategory}
+                  </span>
+                )}
+                {d.licenseNumber && <span className="font-mono text-[11px] text-muted truncate">{d.licenseNumber}</span>}
+              </div>
+
+              {d.licenseExpiresAt && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs">
+                  <span className={`h-2 w-2 rounded-full ${lic.color}`} />
+                  <span className="text-muted">Vence licencia:</span>
+                  <span className="tabular-nums font-medium">{formatDate(d.licenseExpiresAt)}</span>
+                  {lance === 'warning' && <span className="text-amber-700">· por vencer</span>}
+                  {lance === 'expired' && <span className="text-red-700 font-bold">· vencida</span>}
+                </div>
               )}
-              {drivers.map((d: any) => {
-                const lic = expiryDot(d.licenseExpiresAt);
-                const med = expiryDot(d.medicalExamExpiresAt);
-                return (
-                  <tr key={d.id} className="hover:bg-background/50">
-                    <td className="px-4 py-2.5">
-                      <p className="font-medium">{d.fullName}</p>
-                      <p className="text-xs text-muted">{d.phone}</p>
-                    </td>
-                    <td className="px-4 py-2.5 font-mono text-xs">{d.documentType} {d.document}</td>
-                    <td className="px-4 py-2.5 text-xs">
-                      <span className="inline-flex rounded-md bg-primary/10 px-1.5 py-0.5 font-bold text-primary">{d.licenseCategory ?? '—'}</span>
-                      <p className="mt-0.5 font-mono text-[11px]">{d.licenseNumber}</p>
-                    </td>
-                    <td className="px-4 py-2.5 text-xs">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${lic.color}`} />
-                        <span className="tabular-nums">{d.licenseExpiresAt ? formatDate(d.licenseExpiresAt) : '—'}</span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-xs">
-                      <p>{d.eps ?? '—'}</p>
-                      <p className="text-muted">{d.arl ?? '—'} · {d.pension ?? '—'}</p>
-                    </td>
-                    <td className="px-4 py-2.5 text-xs">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${med.color}`} />
-                        <span className="tabular-nums">{d.medicalExamExpiresAt ? formatDate(d.medicalExamExpiresAt) : '—'}</span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5"><DriverActions driver={d} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                <div className="rounded-md bg-background p-1.5">
+                  <p className="text-muted uppercase tracking-wider font-semibold text-[9px]">EPS</p>
+                  <p className="font-medium truncate">{d.eps ?? '—'}</p>
+                </div>
+                <div className="rounded-md bg-background p-1.5">
+                  <p className="text-muted uppercase tracking-wider font-semibold text-[9px]">ARL</p>
+                  <p className="font-medium truncate">{d.arl ?? '—'}</p>
+                </div>
+                <div className="rounded-md bg-background p-1.5">
+                  <p className="text-muted uppercase tracking-wider font-semibold text-[9px]">Pensión</p>
+                  <p className="font-medium truncate">{d.pension ?? '—'}</p>
+                </div>
+              </div>
+
+              {d.medicalExamExpiresAt && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs">
+                  <span className={`h-2 w-2 rounded-full ${med.color}`} />
+                  <span className="text-muted">Examen méd.:</span>
+                  <span className="tabular-nums font-medium">{formatDate(d.medicalExamExpiresAt)}</span>
+                </div>
+              )}
+
+              {(d.phone || d.email) && (
+                <div className="mt-3 pt-3 border-t border-border text-[11px] text-muted space-y-0.5">
+                  {d.phone && <p>📞 {d.phone}</p>}
+                  {d.email && <p>📧 {d.email}</p>}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

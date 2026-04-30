@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { eq, desc, asc } from 'drizzle-orm';
+import { eq, desc, asc, count, and } from 'drizzle-orm';
 import {
   getDb, owners, drivers, vehicles, clients, contracts, maintenances, invoices,
 } from '@nexo/db';
@@ -16,7 +16,14 @@ export async function registerViewRoutes(app: FastifyInstance) {
     if (!tid) return { owners: [] };
     const db = getDb();
     const list = await db.select().from(owners).where(eq(owners.tenantId, tid)).orderBy(asc(owners.fullName));
-    return { owners: list };
+    // Adjuntar conteo + placas de vehículos por propietario
+    const enriched = await Promise.all(list.map(async (o) => {
+      const vs = await db.select({ id: vehicles.id, plate: vehicles.plate, status: vehicles.status })
+        .from(vehicles)
+        .where(and(eq(vehicles.tenantId, tid), eq(vehicles.ownerId, o.id)));
+      return { ...o, vehiclesCount: vs.length, vehicles: vs };
+    }));
+    return { owners: enriched };
   });
 
   app.get('/drivers', { preHandler: [authMiddleware, subscriptionGuard] }, async (req) => {
@@ -46,7 +53,19 @@ export async function registerViewRoutes(app: FastifyInstance) {
     if (!tid) return { clients: [] };
     const db = getDb();
     const list = await db.select().from(clients).where(eq(clients.tenantId, tid)).orderBy(asc(clients.legalName));
-    return { clients: list };
+    // Adjuntar contratos asociados con la placa del vehículo asignado
+    const enriched = await Promise.all(list.map(async (c) => {
+      const ctrs = await db.select({
+        id: contracts.id, code: contracts.code, status: contracts.status,
+        vehiclePlate: vehicles.plate,
+      })
+        .from(contracts)
+        .leftJoin(vehicles, eq(contracts.vehicleId, vehicles.id))
+        .where(and(eq(contracts.tenantId, tid), eq(contracts.clientId, c.id)));
+      const active = ctrs.filter((x) => x.status === 'active').length;
+      return { ...c, contractsCount: ctrs.length, contractsActive: active, contracts: ctrs };
+    }));
+    return { clients: enriched };
   });
 
   app.get('/contracts', { preHandler: [authMiddleware, subscriptionGuard] }, async (req) => {

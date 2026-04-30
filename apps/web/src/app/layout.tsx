@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import '../styles/globals.css';
+import { RouteProgress } from '@/components/route-progress';
 
 export const metadata: Metadata = {
   title: 'Nexo — Gestiona tus vehículos. Simplifica tu operación.',
@@ -26,7 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <Suspense fallback={null}><RouteProgress /></Suspense>
+        {children}
+      </body>
     </html>
   );
 }

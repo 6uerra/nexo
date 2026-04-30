@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { driverCreateSchema } from '@nexo/shared';
 import { EntityDrawer } from './entity-drawer';
+import { MediaCapture, type MediaItem } from './media-capture';
 
 type Driver = {
   id?: string;
@@ -140,6 +141,13 @@ function DriverDrawer({ initial, onClose }: { initial: Driver; onClose: () => vo
         <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="h-4 w-4 rounded border-border text-primary cursor-pointer" />
         <span>Conductor activo</span>
       </label>
+      {isEdit && initial.id && (
+        <fieldset className="rounded-lg border border-border p-3">
+          <legend className="px-1 text-xs font-bold uppercase tracking-wider text-muted">Foto y licencia</legend>
+          <p className="text-xs text-muted mb-2">Adjunta foto del conductor y de la licencia.</p>
+          <MediaCapture entityType="driver" entityId={initial.id} kinds={['image', 'document']} label="driver" initial={[]} />
+        </fieldset>
+      )}
     </EntityDrawer>
   );
 }

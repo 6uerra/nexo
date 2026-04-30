@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { vehicleCreateSchema } from '@nexo/shared';
 import { EntityDrawer } from './entity-drawer';
+import { MediaCapture, type MediaItem } from './media-capture';
 
 type Vehicle = {
   id?: string;
@@ -70,6 +71,8 @@ function VehicleDrawer({ initial, onClose }: { initial: Vehicle; onClose: () => 
   useEffect(() => {
     api<{ owners: Array<{ id: string; fullName: string }> }>('/owners').then((r) => setOwners(r.owners)).catch(() => {});
   }, []);
+
+  const [media, setMedia] = useState<MediaItem[]>([]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,6 +143,20 @@ function VehicleDrawer({ initial, onClose }: { initial: Vehicle; onClose: () => 
         <label className="label">Notas</label>
         <textarea className="input min-h-[60px]" value={form.notes ?? ''} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
       </div>
+      {isEdit && initial.id && (
+        <fieldset className="rounded-lg border border-border p-3">
+          <legend className="px-1 text-xs font-bold uppercase tracking-wider text-muted">Fotos, matrícula y videos</legend>
+          <p className="text-xs text-muted mb-2">Adjunta evidencia visual del vehículo. La foto de la matrícula puede tomarse directamente con la cámara.</p>
+          <MediaCapture
+            entityType="vehicle"
+            entityId={initial.id}
+            kinds={['image', 'video', 'document']}
+            label="vehicle"
+            initial={media}
+            onChange={setMedia}
+          />
+        </fieldset>
+      )}
     </EntityDrawer>
   );
 }

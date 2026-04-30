@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Truck } from 'lucide-react';
 import { OwnerCreateButton, OwnerActions } from '@/components/owner-form';
 
 async function load() {
@@ -57,6 +57,24 @@ export default async function OwnersPage() {
               <div className="mt-3 rounded-lg bg-background p-2.5 text-xs">
                 <p className="font-semibold text-ink">{o.bankInfo.bank}</p>
                 <p className="text-muted">{o.bankInfo.accountType} · <span className="font-mono">{o.bankInfo.account}</span></p>
+              </div>
+            )}
+            {o.vehicles && o.vehicles.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted">
+                  <Truck className="h-3 w-3" />
+                  {o.vehiclesCount} {o.vehiclesCount === 1 ? 'vehículo' : 'vehículos'}
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {o.vehicles.map((v: any) => (
+                    <span key={v.id} className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[11px] text-primary">{v.plate}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {(!o.vehicles || o.vehicles.length === 0) && (
+              <div className="mt-3 pt-3 border-t border-border text-[11px] text-muted italic">
+                Sin vehículos asignados
               </div>
             )}
           </div>

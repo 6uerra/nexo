@@ -1,9 +1,22 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Truck, Users, ShieldCheck, Building2, FileSignature, AlertTriangle, Wallet, Calendar } from 'lucide-react';
 import { KpiCard } from '@/components/kpi-card';
 import { PlanBanner } from '@/components/plan-banner';
 import { formatCop } from '@/lib/utils';
+
+async function getMe() {
+  const c = await cookies();
+  const token = c.get(process.env.SESSION_COOKIE_NAME ?? 'nexo_session')?.value;
+  const apiUrl = process.env.API_URL ?? 'http://localhost:3001';
+  const r = await fetch(`${apiUrl}/api/v1/auth/me`, {
+    headers: { cookie: `${process.env.SESSION_COOKIE_NAME ?? 'nexo_session'}=${token}` },
+    cache: 'no-store',
+  });
+  if (!r.ok) return null;
+  return r.json();
+}
 
 async function getKpis() {
   const c = await cookies();
@@ -44,6 +57,10 @@ async function getModulesCount() {
 }
 
 export default async function DashboardPage() {
+  // Admin: el dashboard tenant-scoped no aplica; redirigir a su panel
+  const me = await getMe();
+  if (me?.session?.role === 'super_admin') redirect('/admin/clients');
+
   const data = await getKpis();
   const subData = await getSubscription();
   const mods = await getModulesCount();

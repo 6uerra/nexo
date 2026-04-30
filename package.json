@@ -1,0 +1,31 @@
+{
+  "name": "nexo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nexo — SaaS multi-tenant de gestión de flotas para administradores intermediarios",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @nexo/db generate",
+    "db:migrate": "pnpm --filter @nexo/db migrate",
+    "db:seed": "pnpm --filter @nexo/db seed",
+    "db:studio": "pnpm --filter @nexo/db studio",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "setup": "bash scripts/setup.sh",
+    "test": "turbo run test",
+    "test:e2e": "bash scripts/test-e2e.sh"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.2",
+    "prettier": "^3.4.2"
+  }
+}

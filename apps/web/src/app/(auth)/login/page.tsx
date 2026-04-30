@@ -5,8 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/logo';
 import { api } from '@/lib/api';
 import { loginSchema, type AuthSession } from '@nexo/shared';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, KeyRound, Car } from 'lucide-react';
 import { TestFillButton } from '@/components/test-fill-button';
+import { useEffect } from 'react';
+
+const QUICK_USERS = {
+  admin: { email: 'admin@nexo.local', password: 'NexoAdmin2026!', redirect: '/admin/clients' },
+  user: { email: 'admin@demo.local', password: 'Demo2026!', redirect: '/dashboard' },
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +20,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [quickBusy, setQuickBusy] = useState<'admin' | 'user' | null>(null);
+  const [devMode, setDevMode] = useState(false);
+
+  useEffect(() => {
+    setDevMode(process.env.NEXT_PUBLIC_DEV_MODE === 'true');
+  }, []);
+
+  async function quickLogin(role: 'admin' | 'user') {
+    setError(null);
+    setQuickBusy(role);
+    try {
+      const u = QUICK_USERS[role];
+      // Limpia sesión previa por si hay otra activa
+      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+      const r = await api<{ session: AuthSession }>('/auth/login', { method: 'POST', json: { email: u.email, password: u.password } });
+      router.push(u.redirect);
+    } catch (e: any) {
+      setError(e?.message ?? 'No pudimos entrar con la cuenta de prueba');
+    } finally {
+      setQuickBusy(null);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,6 +117,35 @@ export default function LoginPage() {
           <div className="mt-4 pt-4 border-t border-border">
             <Link href="/roadmap" className="text-xs text-muted hover:text-ink">Ver lo que viene en Nexo →</Link>
           </div>
+
+          {devMode && (
+            <div className="mt-3 flex items-center justify-end gap-1.5">
+              <button
+                type="button"
+                onClick={() => quickLogin('admin')}
+                disabled={quickBusy !== null}
+                aria-label="Entrar como admin"
+                title="Entrar como admin (dev)"
+                className="group inline-flex h-7 w-7 items-center justify-center rounded-md text-muted/50 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors disabled:opacity-30"
+              >
+                {quickBusy === 'admin'
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <KeyRound className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('user')}
+                disabled={quickBusy !== null}
+                aria-label="Entrar como usuario"
+                title="Entrar como usuario (dev)"
+                className="group inline-flex h-7 w-7 items-center justify-center rounded-md text-muted/50 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors disabled:opacity-30"
+              >
+                {quickBusy === 'user'
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Car className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          )}
         </div>
         <p className="mt-6 text-center text-xs text-muted">
           Al ingresar aceptas nuestros{' '}

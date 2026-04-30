@@ -21,7 +21,7 @@ describe('tenants', () => {
     const r = await http('/tenants', { cookie });
     expect(r.status).toBe(200);
     expect(Array.isArray(r.data.tenants)).toBe(true);
-    expect(r.data.tenants.length).toBeGreaterThanOrEqual(2); // system + demo
+    expect(r.data.tenants.length).toBeGreaterThanOrEqual(1); // demo (system excluido)
   });
 
   it('tenant_admin NO puede listar todos los tenants (403)', async () => {

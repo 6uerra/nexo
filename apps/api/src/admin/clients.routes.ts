@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { eq, desc, count } from 'drizzle-orm';
+import { eq, desc, count, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { getDb, tenants, users, subscriptions, tenantModules, platformPlans, MODULE_KEYS, type ModuleKey } from '@nexo/db';
@@ -32,10 +32,10 @@ function slugify(s: string): string {
 }
 
 export async function registerAdminClientsRoutes(app: FastifyInstance) {
-  // Listar clientes (solo super-admin) con datos resumidos
+  // Listar clientes (solo super-admin) con datos resumidos. Excluye el tenant 'system' (no es cliente).
   app.get('/admin/clients', { preHandler: [authMiddleware, requireRole('super_admin')] }, async () => {
     const db = getDb();
-    const list = await db.select().from(tenants).orderBy(desc(tenants.createdAt));
+    const list = await db.select().from(tenants).where(ne(tenants.slug, 'system')).orderBy(desc(tenants.createdAt));
     const enriched = await Promise.all(list.map(async (t) => {
       const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.tenantId, t.id)).limit(1);
       const [u] = await db.select({ c: count() }).from(users).where(eq(users.tenantId, t.id));

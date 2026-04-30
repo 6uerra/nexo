@@ -30,10 +30,11 @@ export async function registerTenantRoutes(app: FastifyInstance) {
     },
   );
 
-  // Super admin: listar tenants
+  // Super admin: listar tenants (excluye el tenant 'system')
   app.get('/tenants', { preHandler: [authMiddleware, requireRole('super_admin')] }, async () => {
     const db = getDb();
-    const list = await db.select().from(tenants);
+    const { ne } = await import('drizzle-orm');
+    const list = await db.select().from(tenants).where(ne(tenants.slug, 'system'));
     return { tenants: list };
   });
 }

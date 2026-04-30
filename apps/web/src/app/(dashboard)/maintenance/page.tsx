@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { Wrench } from 'lucide-react';
 import { formatCop, formatDate } from '@/lib/utils';
+import { PendingFeatureBanner } from '@/components/pending-feature-banner';
 
 async function load() {
   const c = await cookies();
@@ -35,6 +36,22 @@ export default async function MaintenancePage() {
         </h1>
         <p className="text-sm text-muted">Por fecha y kilometraje.</p>
       </header>
+
+      <PendingFeatureBanner
+        status="partial"
+        title="CRUD de Mantenimientos"
+        sprint={4}
+        whatWorks={[
+          'Lectura de mantenimientos con vehículo, costo y deducciones',
+          'KPIs (Total, Deducido, Asume cliente)',
+        ]}
+        whatPending={[
+          'Registrar nuevo mantenimiento (vincular vehículo + costo + factura)',
+          'Adjuntar foto/PDF de la factura del taller',
+          'Cron alertas automáticas por próximos vencimientos',
+          'Reportes de costos por vehículo',
+        ]}
+      />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="card p-4">

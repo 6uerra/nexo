@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { FileText } from 'lucide-react';
 import { formatCop, formatDate } from '@/lib/utils';
+import { PendingFeatureBanner } from '@/components/pending-feature-banner';
 
 async function load() {
   const c = await cookies();
@@ -34,6 +35,22 @@ export default async function ContractsPage() {
         </h1>
         <p className="text-sm text-muted">Contratos vigentes y borradores.</p>
       </header>
+
+      <PendingFeatureBanner
+        status="partial"
+        title="CRUD de Contratos"
+        sprint={3}
+        whatWorks={[
+          'Lectura de contratos con cliente, vehículo, conductor y montos',
+          'Estados visuales (Activo, Borrador, Finalizado, etc.)',
+        ]}
+        whatPending={[
+          'Crear contrato nuevo (vincular cliente + vehículo + conductor)',
+          'Generar PDF del contrato (Sprint 3)',
+          'Firma electrónica',
+          'Editar/cancelar contratos existentes',
+        ]}
+      />
 
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">

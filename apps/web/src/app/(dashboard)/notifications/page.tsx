@@ -23,6 +23,15 @@ export default async function NotificationsPage() {
         <p className="text-sm text-muted">Avisos del sistema y vencimientos</p>
       </header>
 
+      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm">
+        <p className="font-bold text-amber-900">⚠️ Notificaciones en tiempo real pendientes</p>
+        <p className="mt-1 text-xs text-amber-800">
+          El centro de notificaciones in-app funciona, pero las alertas automáticas por vencimiento
+          (SOAT, RTM, licencia, exámenes) las dispara un cron in-process — falta worker dedicado.
+          WhatsApp queda para Sprint Enterprise.
+        </p>
+      </div>
+
       {notifications.length === 0 ? (
         <div className="card p-12 text-center">
           <Bell className="mx-auto h-10 w-10 text-muted" />

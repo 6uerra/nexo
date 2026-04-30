@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { Receipt, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCop, formatDate } from '@/lib/utils';
+import { PendingFeatureBanner } from '@/components/pending-feature-banner';
 
 async function load() {
   const c = await cookies();
@@ -38,6 +39,23 @@ export default async function BillingPage() {
         </h1>
         <p className="text-sm text-muted">Cobros a empresas cliente y pagos a propietarios.</p>
       </header>
+
+      <PendingFeatureBanner
+        status="partial"
+        title="Facturación cruzada"
+        sprint={4}
+        whatWorks={[
+          'Lectura de facturas (cobros y pagos) con KPIs (margen, total cobrado, total pagado)',
+          'Cálculo automático de bruto/deducciones/neto por factura',
+        ]}
+        whatPending={[
+          'Generar facturas mensuales por contrato automáticamente',
+          'Aplicar deducciones de mantenimientos al pago del propietario',
+          'Conciliación bancaria (marcar pagada con comprobante)',
+          'Estados de cuenta exportables (Excel/PDF)',
+          'Integración con DIAN (facturación electrónica)',
+        ]}
+      />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="card p-4">

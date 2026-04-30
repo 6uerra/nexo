@@ -14,7 +14,21 @@ async function bootstrap() {
   });
 
   await app.register(cors, {
-    origin: [config.webUrl],
+    // En dev permitimos cualquier origen de LAN (192.168.x.x / 10.x.x.x / localhost)
+    // para acceso desde móviles en la misma red. En prod usar config.webUrl explícito.
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (config.env !== 'production') {
+        if (
+          origin === config.webUrl ||
+          /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin)
+        ) {
+          return cb(null, true);
+        }
+      }
+      if (origin === config.webUrl) return cb(null, true);
+      return cb(new Error('CORS: origen no permitido'), false);
+    },
     credentials: true,
   });
   await app.register(cookie);

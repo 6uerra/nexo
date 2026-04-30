@@ -6,7 +6,6 @@ import { Logo } from '@/components/logo';
 import { api } from '@/lib/api';
 import { loginSchema, type AuthSession } from '@nexo/shared';
 import { AlertCircle, Loader2, KeyRound, Car } from 'lucide-react';
-import { TestFillButton } from '@/components/test-fill-button';
 
 // Quick-login icons. Quita este bloque y los handlers `quickLogin` antes de producción.
 const QUICK_USERS = {
@@ -68,13 +67,8 @@ export default function LoginPage() {
           </Link>
         </div>
         <div className="card p-7">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h1>
-              <p className="mt-1 text-sm text-muted">Ingresa con tu cuenta para continuar</p>
-            </div>
-            <TestFillButton onFill={() => { setEmail('admin@demo.local'); setPassword('Demo2026!'); }} label="Demo" />
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h1>
+          <p className="mt-1 text-sm text-muted">Ingresa con tu cuenta para continuar</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>

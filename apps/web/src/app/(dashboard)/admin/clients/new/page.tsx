@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, CheckCircle2, Send, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
 import { PLANS, PLAN_KEYS, MODULE_KEYS, MODULE_LABELS, getPlanModules } from '@nexo/shared';
-import { TestFillButton } from '@/components/test-fill-button';
 
 export default function NewClientPage() {
   const router = useRouter();
@@ -68,19 +67,7 @@ export default function NewClientPage() {
       <div className="card p-6">
         {step === 'company' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">1. Datos de la empresa y admin</h2>
-              <TestFillButton onFill={() => {
-                const stamp = Date.now().toString().slice(-5);
-                setCompany({
-                  tenantName: `Demo Test ${stamp}`,
-                  legalName: `Demo Test ${stamp} SAS`,
-                  nit: `900${stamp}123-7`,
-                  city: 'Medellín',
-                  adminName: 'Carlos Test',
-                  adminEmail: `cliente-${stamp}@test.local`,
-                });
-              }} /></div>
+            <h2 className="font-semibold">1. Datos de la empresa y admin</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Nombre de la empresa">
                 <input className="input" required value={company.tenantName}

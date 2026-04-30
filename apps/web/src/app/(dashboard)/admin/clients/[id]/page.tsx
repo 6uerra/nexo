@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, CalendarPlus, Mail, RotateCcw } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { ClientDetailActions } from './actions';
+import { PlanSwitcher } from './plan-switcher';
 
 async function load(id: string) {
   const c = await cookies();
@@ -58,6 +59,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           <p className="mt-1 text-xs text-muted">activos</p>
         </div>
       </div>
+
+      <PlanSwitcher clientId={id} currentPlan={sub?.plan ?? null} />
 
       <ClientDetailActions clientId={id} />
 

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { tenantOnboardingSchema } from '@nexo/shared';
-import { TestFillButton } from '@/components/test-fill-button';
 
 const STEPS = [
   { id: 'company', title: 'Datos de la empresa', desc: 'Información legal del intermediario' },
@@ -67,17 +66,7 @@ export default function OnboardingPage() {
       <div className="card mt-6 p-6">
         {step === 0 && (
           <form onSubmit={saveCompany} className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Datos de la empresa</h2>
-              <TestFillButton onFill={() => setForm({
-                legalName: 'Transportes del Norte SAS',
-                nit: '900123456-7',
-                email: 'contacto@empresademo.co',
-                phone: '+57 300 123 4567',
-                address: 'Cra 7 # 100-50',
-                city: 'Bogotá',
-              })} />
-            </div>
+            <h2 className="font-semibold">Datos de la empresa</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="label">Razón social</label>

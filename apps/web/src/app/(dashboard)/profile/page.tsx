@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { UserCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { TestFillButton } from '@/components/test-fill-button';
 
 export default function ProfilePage() {
   const [me, setMe] = useState<any>(null);
@@ -43,14 +42,11 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <UserCircle className="h-6 w-6 text-primary" /> Mi perfil
-          </h1>
-          <p className="text-sm text-muted">Edita tus datos personales y contraseña.</p>
-        </div>
-        <TestFillButton onFill={() => { setName('Pandora Test'); setPhone('+57 300 999 8888'); }} />
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <UserCircle className="h-6 w-6 text-primary" /> Mi perfil
+        </h1>
+        <p className="text-sm text-muted">Edita tus datos personales y contraseña.</p>
       </header>
 
       {me && (

@@ -2,7 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import { eq, desc, count } from 'drizzle-orm';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { getDb, tenants, users, subscriptions, tenantModules, MODULE_KEYS, type ModuleKey } from '@nexo/db';
+import { getDb, tenants, users, subscriptions, tenantModules, platformPlans, MODULE_KEYS, type ModuleKey } from '@nexo/db';
+import { and } from 'drizzle-orm';
 import { authMiddleware, requireRole } from '../auth/auth.middleware.js';
 import { HttpError } from '../common/error-handler.js';
 import { generateToken, expiresIn } from '../auth/activation.js';
@@ -181,6 +182,45 @@ export async function registerAdminClientsRoutes(app: FastifyInstance) {
     const { id } = req.params as { id: string };
     const db = getDb();
     await db.delete(tenants).where(eq(tenants.id, id));
+    return { ok: true };
+  });
+
+  // Cambiar plan: actualiza subscription.plan + sincroniza tenant_modules con plan.modules
+  app.post('/admin/clients/:id/set-plan', { preHandler: [authMiddleware, requireRole('super_admin')] }, async (req) => {
+    const { id } = req.params as { id: string };
+    const body = z.object({ planKey: z.string().min(2) }).parse(req.body);
+    const db = getDb();
+    const [plan] = await db.select().from(platformPlans).where(eq(platformPlans.key, body.planKey)).limit(1);
+    if (!plan) throw new HttpError(404, 'Plan no encontrado');
+    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.tenantId, id)).limit(1);
+    if (sub) {
+      await db.update(subscriptions)
+        .set({ plan: body.planKey as any, updatedAt: new Date() })
+        .where(eq(subscriptions.id, sub.id));
+    }
+    // Sincronizar módulos: enable los del plan, disable los demás
+    const planMods = new Set<string>(plan.modules ?? []);
+    for (const key of MODULE_KEYS) {
+      const enabled = planMods.has(key);
+      const existing = await db.select().from(tenantModules)
+        .where(and(eq(tenantModules.tenantId, id), eq(tenantModules.moduleKey, key))).limit(1);
+      if (existing.length === 0) {
+        await db.insert(tenantModules).values({ tenantId: id, moduleKey: key, enabled, updatedBy: req.session!.userId });
+      } else {
+        await db.update(tenantModules)
+          .set({ enabled, updatedAt: new Date(), updatedBy: req.session!.userId })
+          .where(and(eq(tenantModules.tenantId, id), eq(tenantModules.moduleKey, key)));
+      }
+    }
+    return { ok: true, planKey: plan.key, planName: plan.name, modulesEnabled: planMods.size };
+  });
+
+  // Activar / desactivar tenant
+  app.post('/admin/clients/:id/toggle-active', { preHandler: [authMiddleware, requireRole('super_admin')] }, async (req) => {
+    const { id } = req.params as { id: string };
+    const body = z.object({ isActive: z.boolean() }).parse(req.body);
+    const db = getDb();
+    await db.update(tenants).set({ isActive: body.isActive, updatedAt: new Date() }).where(eq(tenants.id, id));
     return { ok: true };
   });
 

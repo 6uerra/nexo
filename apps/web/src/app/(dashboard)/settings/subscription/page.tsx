@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
-import { CalendarClock, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { CalendarClock, ShieldAlert, ShieldCheck, ExternalLink, Info } from 'lucide-react';
 import { formatCop, formatDate } from '@/lib/utils';
+import { BrandLogo } from '@/components/brand-logo';
 
 async function loadAll() {
   const c = await cookies();
@@ -59,30 +60,9 @@ export default async function SubscriptionPage() {
 
       <section>
         <h2 className="font-semibold">Cómo pagar</h2>
-        <p className="text-sm text-muted">Usa cualquiera de estos métodos. Después registra tu pago abajo.</p>
+        <p className="text-sm text-muted">Elige el método que prefieras y registra tu pago al final.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {methods.map((m: any) => (
-            <div key={m.id} className="card p-5">
-              <p className="font-semibold">{m.label}</p>
-              {m.kind === 'bank' && (
-                <dl className="mt-2 space-y-1 text-sm text-muted">
-                  <div><span className="text-ink font-medium">Banco:</span> {m.bankName}</div>
-                  <div><span className="text-ink font-medium">Cuenta:</span> {m.bankAccount} ({m.bankAccountType})</div>
-                  <div><span className="text-ink font-medium">Titular:</span> {m.holderName}</div>
-                  <div><span className="text-ink font-medium">Documento:</span> {m.holderDocument}</div>
-                </dl>
-              )}
-              {m.kind === 'qr' && m.qrImageUrl && (
-                <img src={m.qrImageUrl} alt={`QR ${m.label}`} className="mt-3 h-40 w-40 rounded-lg border border-border" />
-              )}
-              {m.kind === 'mercado_pago' && m.link && (
-                <a href={m.link} target="_blank" rel="noreferrer" className="btn-primary mt-3 text-sm w-full">
-                  Pagar en Mercado Pago
-                </a>
-              )}
-              {m.instructions && <p className="mt-3 text-xs text-muted">{m.instructions}</p>}
-            </div>
-          ))}
+          {methods.map((m: any) => <MethodCard key={m.id} method={m} />)}
         </div>
       </section>
 
@@ -119,6 +99,64 @@ export default async function SubscriptionPage() {
           </table>
         </div>
       </section>
+    </div>
+  );
+}
+
+function MethodCard({ method }: { method: any }) {
+  const brandKind = method.kind === 'bank' ? 'bancolombia' : method.kind === 'mercado_pago' ? 'mercado_pago' : 'qr';
+  return (
+    <div className="card p-5 flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <BrandLogo kind={brandKind} />
+        <div>
+          <p className="font-semibold leading-tight">{method.label}</p>
+          {method.kind === 'bank' && <p className="text-xs text-muted">{method.bankName}</p>}
+          {method.kind === 'mercado_pago' && <p className="text-xs text-muted">Pago en línea</p>}
+          {method.kind === 'qr' && <p className="text-xs text-muted">Escanea con tu app de banca</p>}
+        </div>
+      </div>
+
+      {method.kind === 'bank' && (
+        <dl className="space-y-1 text-sm">
+          <Row term="Tipo">{method.bankAccountType ?? '—'}</Row>
+          <Row term="Cuenta"><span className="font-mono tabular-nums">{method.bankAccount ?? '—'}</span></Row>
+          <Row term="Titular">{method.holderName ?? '—'}</Row>
+          <Row term="Documento"><span className="font-mono">{method.holderDocument ?? '—'}</span></Row>
+        </dl>
+      )}
+
+      {method.kind === 'mercado_pago' && method.link && (
+        <a href={method.link} target="_blank" rel="noreferrer" className="btn-primary text-sm">
+          Pagar en Mercado Pago
+          <ExternalLink className="h-4 w-4" />
+        </a>
+      )}
+
+      {method.qrImageUrl ? (
+        <div>
+          <p className="text-xs font-medium text-muted mb-2">Escanea el QR:</p>
+          <img src={method.qrImageUrl} alt={`QR ${method.label}`} className="h-44 w-44 rounded-lg border border-border bg-white p-2" />
+        </div>
+      ) : method.kind === 'bank' ? (
+        <div className="rounded-lg bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-800 flex gap-2">
+          <Info className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>El admin todavía no subió el QR. Usa los datos bancarios de arriba.</span>
+        </div>
+      ) : null}
+
+      {method.instructions && (
+        <p className="text-xs text-muted leading-relaxed">{method.instructions}</p>
+      )}
+    </div>
+  );
+}
+
+function Row({ term, children }: { term: string; children: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-2">
+      <dt className="text-muted">{term}:</dt>
+      <dd className="font-medium text-ink text-right">{children}</dd>
     </div>
   );
 }

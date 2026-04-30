@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Truck, Users, Building2, FileText, Wrench,
-  Receipt, Bell, Settings, LogOut, ShieldCheck,
+  Receipt, Bell, Settings, LogOut, ShieldCheck, Wallet, Sparkles,
 } from 'lucide-react';
 import { Logo } from './logo';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/maintenance', label: 'Mantenimiento', icon: Wrench, module: 'maintenance' },
   { href: '/billing', label: 'Facturación', icon: Receipt, module: 'billing' },
   { href: '/notifications', label: 'Notificaciones', icon: Bell, module: null },
+  { href: '/roadmap', label: 'Próximamente', icon: Sparkles, module: null },
 ];
 
 export function NavSidebar({
@@ -61,6 +62,15 @@ export function NavSidebar({
         })}
       </nav>
       <div className="border-t border-border p-3">
+        {session.role === 'super_admin' && (
+          <Link
+            href="/admin/payment-methods"
+            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-background cursor-pointer"
+          >
+            <Wallet className="h-5 w-5" />
+            <span>Métodos de pago</span>
+          </Link>
+        )}
         <Link
           href="/settings/modules"
           className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-background cursor-pointer"

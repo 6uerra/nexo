@@ -6,6 +6,7 @@ import { registerSubscriptionRoutes } from '../subscriptions/subscriptions.route
 import { registerNotificationRoutes } from '../notifications/notifications.routes.js';
 import { registerDashboardRoutes } from '../dashboard/dashboard.routes.js';
 import { registerMediaRoutes } from '../media/media.routes.js';
+import { registerAdminPaymentMethodRoutes } from '../admin/payment-methods.routes.js';
 
 export async function registerRoutes(app: FastifyInstance) {
   await app.register(
@@ -17,6 +18,7 @@ export async function registerRoutes(app: FastifyInstance) {
       await registerNotificationRoutes(api);
       await registerDashboardRoutes(api);
       await registerMediaRoutes(api);
+      await registerAdminPaymentMethodRoutes(api);
     },
     { prefix: '/api/v1' },
   );

@@ -125,30 +125,32 @@ async function main() {
     console.log('  ↺ Tenant demo ya existía');
   }
 
-  // 4. Métodos de pago de la plataforma (placeholder)
+  // 4. Métodos de pago de la plataforma (datos dummy editables por el super-admin)
   const existingMethods = await db.select().from(platformPaymentMethods).limit(1);
   if (existingMethods.length === 0) {
     await db.insert(platformPaymentMethods).values([
       {
-        label: 'Transferencia bancaria',
+        label: 'Bancolombia',
         kind: 'bank',
         bankName: 'Bancolombia',
-        bankAccount: '000-000000-00',
-        bankAccountType: 'Ahorros',
-        holderName: 'Tu nombre',
-        holderDocument: 'CC 1.000.000.000',
-        instructions: 'Envía el comprobante al correo admin@nexo.local',
+        bankAccount: '123-456789-00',
+        bankAccountType: 'Cuenta de Ahorros',
+        holderName: 'Nexo SAS',
+        holderDocument: 'NIT 900.123.456-7',
+        instructions: 'Realiza la transferencia y envía el comprobante a admin@nexo.local indicando el NIT de tu empresa.',
         isActive: true,
+        sortOrder: '1',
       },
       {
         label: 'Mercado Pago',
         kind: 'mercado_pago',
         link: 'https://mpago.la/tu-link',
-        instructions: 'Paga con tu cuenta de Mercado Pago y adjunta el comprobante',
+        instructions: 'Abre el link, paga el monto correspondiente y guarda el comprobante.',
         isActive: true,
+        sortOrder: '2',
       },
     ]);
-    console.log('  ✔ Métodos de pago seed');
+    console.log('  ✔ Métodos de pago seed (Bancolombia + Mercado Pago — edítalos en /admin/payment-methods)');
   }
 
   console.log('✅ Seed completo');

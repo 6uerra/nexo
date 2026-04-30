@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '../styles/globals.css';
+import { DevTools } from '@/components/dev-tools';
 
 export const metadata: Metadata = {
   title: 'Nexo — Gestiona tus vehículos. Simplifica tu operación.',
@@ -26,7 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        {children}
+        <DevTools />
+      </body>
     </html>
   );
 }

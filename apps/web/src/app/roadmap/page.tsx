@@ -1,6 +1,6 @@
 import {
   Globe, Cloud, Lock, ShieldCheck, Activity, Smartphone, FileSpreadsheet,
-  MapPin, Bot, Languages, MessageCircle, Zap, Users, Database, Receipt,
+  Bot, Languages, MessageCircle, Zap, Users, Database, Receipt,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PublicShell } from '@/components/public-shell';
@@ -32,7 +32,6 @@ const SECTIONS: { title: string; subtitle: string; items: Item[] }[] = [
     items: [
       { icon: Smartphone, title: 'App PWA instalable', desc: 'Que se vea como app nativa en el celular y funcione sin conexión.', status: 'planned' },
       { icon: FileSpreadsheet, title: 'Exportar a Excel y PDF', desc: 'Estados de cuenta, reportes y datos descargables.', status: 'planned' },
-      { icon: MapPin, title: 'Mapas y rutas', desc: 'Ver dónde operan tus vehículos con OpenStreetMap (gratis).', status: 'planned' },
       { icon: Bot, title: 'OCR de placas', desc: 'Extraer texto de la foto de la matrícula automáticamente.', status: 'planned' },
       { icon: Receipt, title: 'Facturación electrónica DIAN', desc: 'Integración con Alegra/Siigo cuando sea obligatorio.', status: 'considering' },
     ],

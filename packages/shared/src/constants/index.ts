@@ -1,5 +1,5 @@
 export const APP_NAME = 'Nexo';
-export const APP_TAGLINE = 'Conecta tu flota. Simplifica el negocio.';
+export const APP_TAGLINE = 'Tus vehículos, ordenados. Tu negocio, tranquilo.';
 
 export const COLORS = {
   primary: '#2563EB',

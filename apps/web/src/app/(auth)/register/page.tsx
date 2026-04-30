@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Logo } from '@/components/logo';
 import { Mail, Send, CheckCircle2 } from 'lucide-react';
+import { TestFillButton } from '@/components/test-fill-button';
 
 export default function RegisterPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -46,10 +47,20 @@ export default function RegisterPage() {
               <Mail className="h-3.5 w-3.5" />
               Acceso por invitación
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Solicita tu acceso</h1>
-            <p className="mt-1 text-sm text-muted">
-              Por ahora Nexo es por invitación. Cuéntanos de ti y te activamos un trial de 30 días personalizado.
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Solicita tu acceso</h1>
+                <p className="mt-1 text-sm text-muted">
+                  Por ahora Nexo es por invitación. Cuéntanos de ti y te activamos un trial de 30 días personalizado.
+                </p>
+              </div>
+              <TestFillButton onFill={() => setForm({
+                name: 'Juan Pérez',
+                email: 'juan@ejemplo.com',
+                company: 'Transportes del Norte',
+                message: 'Tengo 12 vehículos y necesito ordenar contratos y pagos.',
+              })} />
+            </div>
 
             <form onSubmit={onSubmit} className="mt-6 space-y-4">
               <div>

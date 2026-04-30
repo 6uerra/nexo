@@ -6,6 +6,7 @@ import { Logo } from '@/components/logo';
 import { api } from '@/lib/api';
 import { loginSchema, type AuthSession } from '@nexo/shared';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { TestFillButton } from '@/components/test-fill-button';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,8 +45,13 @@ export default function LoginPage() {
           </Link>
         </div>
         <div className="card p-7">
-          <h1 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h1>
-          <p className="mt-1 text-sm text-muted">Ingresa con tu cuenta para continuar</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h1>
+              <p className="mt-1 text-sm text-muted">Ingresa con tu cuenta para continuar</p>
+            </div>
+            <TestFillButton onFill={() => { setEmail('admin@demo.local'); setPassword('Demo2026!'); }} label="Demo" />
+          </div>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>

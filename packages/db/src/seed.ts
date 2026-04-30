@@ -63,8 +63,8 @@ async function main() {
       .insert(tenants)
       .values({
         slug: demoSlug,
-        name: 'Flotas Demo',
-        legalName: 'Flotas Demo SAS',
+        name: 'Empresa Demo',
+        legalName: 'Empresa Demo SAS',
         country: 'CO',
         city: 'Bogotá',
         nit: '900123456-7',
@@ -178,7 +178,7 @@ async function main() {
       {
         key: 'standard',
         name: 'Standard',
-        tagline: 'Para flotas en crecimiento',
+        tagline: 'Para empresas en crecimiento',
         priceLabel: 'Consultar',
         showPrice: false,
         vehicleLimit: 20,

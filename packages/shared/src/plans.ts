@@ -36,7 +36,7 @@ export const PLANS: Record<PlanKey, PlanDef> = {
   standard: {
     key: 'standard',
     name: 'Standard',
-    tagline: 'Para flotas en crecimiento',
+    tagline: 'Para empresas en crecimiento',
     priceLabel: 'Próximamente',
     vehicleLimit: 20,
     modules: ['vehicles', 'drivers', 'owners', 'clients', 'notifications'],

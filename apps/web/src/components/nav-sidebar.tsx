@@ -44,11 +44,11 @@ export function NavSidebar({
 
   return (
     <>
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-surface">
-        <div className="flex h-16 items-center border-b border-border px-6">
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-surface sticky top-0 h-screen">
+        <div className="flex h-16 shrink-0 items-center border-b border-border px-6">
           <Logo />
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+        <nav className="flex-1 min-h-0 space-y-1 px-3 py-4 overflow-y-auto">
           {NAV_ITEMS.map((it) => {
             const active = pathname === it.href || pathname.startsWith(it.href + '/');
             const locked = it.module !== null && !enabledModules.includes(it.module);
@@ -94,7 +94,7 @@ export function NavSidebar({
           </div>
         </nav>
 
-        <div className="border-t border-border p-3 space-y-1">
+        <div className="border-t border-border p-3 space-y-1 shrink-0 max-h-[45vh] overflow-y-auto">
           {session.role === 'super_admin' && (
             <>
               <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted">Admin</p>

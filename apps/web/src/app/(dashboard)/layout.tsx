@@ -55,7 +55,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Topbar session={data.session} />
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 pb-24 lg:pb-8">{children}</main>
       </div>
-      <NavMobile />
+      <NavMobile session={data.session} />
     </div>
   );
 }

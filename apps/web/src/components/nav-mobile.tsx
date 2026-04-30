@@ -1,19 +1,36 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Truck, Users, FileText, Settings } from 'lucide-react';
+import {
+  LayoutDashboard, Truck, Users, FileText, UserCircle,
+  Briefcase, Star, Wallet, CreditCard,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { AuthSession } from '@nexo/shared';
 
-const ITEMS = [
+type Item = { href: string; label: string; icon: LucideIcon };
+
+const CLIENT_ITEMS: Item[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
   { href: '/vehicles', label: 'Vehículos', icon: Truck },
   { href: '/drivers', label: 'Conductores', icon: Users },
   { href: '/contracts', label: 'Contratos', icon: FileText },
-  { href: '/settings/modules', label: 'Ajustes', icon: Settings },
+  { href: '/profile', label: 'Perfil', icon: UserCircle },
 ];
 
-export function NavMobile() {
+const ADMIN_ITEMS: Item[] = [
+  { href: '/admin/clients', label: 'Clientes', icon: Briefcase },
+  { href: '/admin/plans', label: 'Planes', icon: Star },
+  { href: '/admin/payment-methods', label: 'Pagos', icon: Wallet },
+  { href: '/admin/subscription-payments', label: 'Cobros', icon: CreditCard },
+  { href: '/profile', label: 'Perfil', icon: UserCircle },
+];
+
+export function NavMobile({ session }: { session: AuthSession }) {
   const pathname = usePathname();
+  const ITEMS = session.role === 'super_admin' ? ADMIN_ITEMS : CLIENT_ITEMS;
+
   return (
     <nav className="lg:hidden fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 backdrop-blur-md">
       <ul className="grid grid-cols-5">

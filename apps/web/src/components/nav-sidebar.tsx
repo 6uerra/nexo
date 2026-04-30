@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   LayoutDashboard, Truck, Users, Building2, FileText, Wrench,
-  Receipt, Bell, Settings, LogOut, ShieldCheck, Wallet, Sparkles,
-  BarChart3, Lock, Briefcase, UserCircle, Star,
+  Receipt, Bell, LogOut, ShieldCheck, Wallet, Sparkles,
+  BarChart3, Lock, Briefcase, UserCircle, Star, CreditCard,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Logo } from './logo';
@@ -15,7 +15,8 @@ import type { AuthSession } from '@nexo/shared';
 
 type NavItem = { href: string; label: string; icon: LucideIcon; module: string | null };
 
-const NAV_ITEMS: NavItem[] = [
+// Cliente: opera su negocio (vehículos, conductores, propietarios, etc.)
+const CLIENT_NAV: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, module: null },
   { href: '/vehicles', label: 'Vehículos', icon: Truck, module: 'vehicles' },
   { href: '/drivers', label: 'Conductores', icon: Users, module: 'drivers' },
@@ -25,6 +26,15 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/maintenance', label: 'Mantenimiento', icon: Wrench, module: 'maintenance' },
   { href: '/billing', label: 'Facturación', icon: Receipt, module: 'billing' },
   { href: '/notifications', label: 'Notificaciones', icon: Bell, module: null },
+];
+
+// Admin: solo administración de la plataforma Nexo
+const ADMIN_NAV: NavItem[] = [
+  { href: '/admin/clients', label: 'Clientes', icon: Briefcase, module: null },
+  { href: '/admin/plans', label: 'Planes', icon: Star, module: null },
+  { href: '/admin/payment-methods', label: 'Métodos de pago', icon: Wallet, module: null },
+  { href: '/admin/subscription-payments', label: 'Pagos de suscripción', icon: CreditCard, module: null },
+  { href: '/admin/emails', label: 'Correos enviados', icon: BarChart3, module: null },
 ];
 
 export function NavSidebar({
@@ -37,6 +47,9 @@ export function NavSidebar({
   const pathname = usePathname();
   const [lockedClick, setLockedClick] = useState<{ label: string } | null>(null);
 
+  const isAdmin = session.role === 'super_admin';
+  const NAV_ITEMS = isAdmin ? ADMIN_NAV : CLIENT_NAV;
+
   async function logout() {
     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/';
@@ -48,10 +61,19 @@ export function NavSidebar({
         <div className="flex h-16 shrink-0 items-center border-b border-border px-6">
           <Logo />
         </div>
+
+        {isAdmin && (
+          <div className="px-3 pt-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              <ShieldCheck className="h-3 w-3" /> Admin Nexo
+            </span>
+          </div>
+        )}
+
         <nav className="flex-1 min-h-0 space-y-1 px-3 py-4 overflow-y-auto">
           {NAV_ITEMS.map((it) => {
             const active = pathname === it.href || pathname.startsWith(it.href + '/');
-            const locked = it.module !== null && !enabledModules.includes(it.module);
+            const locked = !isAdmin && it.module !== null && !enabledModules.includes(it.module);
             const Icon = it.icon;
 
             if (locked) {
@@ -94,23 +116,11 @@ export function NavSidebar({
           </div>
         </nav>
 
-        <div className="border-t border-border p-3 space-y-1 shrink-0 max-h-[45vh] overflow-y-auto">
-          {session.role === 'super_admin' && (
-            <>
-              <p className="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted">Admin</p>
-              <Link href="/admin/clients" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
-                <Briefcase className="h-4 w-4" /><span>Clientes</span>
-              </Link>
-              <Link href="/admin/plans" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
-                <Star className="h-4 w-4" /><span>Planes</span>
-              </Link>
-              <Link href="/admin/payment-methods" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
-                <Wallet className="h-4 w-4" /><span>Métodos de pago</span>
-              </Link>
-              <Link href="/admin/emails" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
-                <BarChart3 className="h-4 w-4" /><span>Correos enviados</span>
-              </Link>
-            </>
+        <div className="border-t border-border p-3 space-y-1 shrink-0">
+          {!isAdmin && (
+            <Link href="/settings/subscription" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
+              <CreditCard className="h-4 w-4" /><span>Mi suscripción</span>
+            </Link>
           )}
           <Link href="/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-background cursor-pointer">
             <UserCircle className="h-4 w-4" /><span>Mi perfil</span>

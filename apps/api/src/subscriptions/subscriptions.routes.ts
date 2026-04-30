@@ -5,6 +5,7 @@ import {
   subscriptions,
   subscriptionPayments,
   platformPaymentMethods,
+  platformPlans,
 } from '@nexo/db';
 import { authMiddleware, requireRole } from '../auth/auth.middleware.js';
 import { HttpError } from '../common/error-handler.js';
@@ -28,7 +29,10 @@ export async function registerSubscriptionRoutes(app: FastifyInstance) {
       .from(subscriptions)
       .where(eq(subscriptions.tenantId, req.session.tenantId))
       .limit(1);
-    return { subscription: sub ?? null };
+    if (!sub) return { subscription: null, plan: null };
+    // Adjuntar detalles del plan (límite vehículos, módulos)
+    const [plan] = await db.select().from(platformPlans).where(eq(platformPlans.key, sub.plan)).limit(1);
+    return { subscription: sub, plan: plan ?? null };
   });
 
   app.get('/payment-methods', async () => {

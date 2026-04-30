@@ -181,13 +181,16 @@ function PlanEditor({
           <span className="text-xs font-normal text-muted">({p.modules.length}/{ALL_MODULE_KEYS.length})</span>
         </label>
         <div className="grid gap-2 sm:grid-cols-3">
-          {ALL_MODULE_KEYS.map((m) => (
-            <label key={m} className={`flex items-center gap-2 rounded-md border p-2 text-sm cursor-pointer ${p.modules.includes(m) ? 'border-primary/40 bg-primary/5' : 'border-border'}`}>
-              <input type="checkbox" checked={p.modules.includes(m)} onChange={() => toggleModule(m)}
-                className="h-4 w-4 rounded border-border text-primary cursor-pointer" />
-              <span className="capitalize">{m}</span>
-            </label>
-          ))}
+          {ALL_MODULE_KEYS.map((m) => {
+            const meta = MODULE_LABELS[m as ModuleKey];
+            return (
+              <label key={m} className={`flex items-center gap-2 rounded-md border p-2 text-sm cursor-pointer ${p.modules.includes(m) ? 'border-primary/40 bg-primary/5' : 'border-border'}`}>
+                <input type="checkbox" checked={p.modules.includes(m)} onChange={() => toggleModule(m)}
+                  className="h-4 w-4 rounded border-border text-primary cursor-pointer" />
+                <span>{meta?.label ?? m}</span>
+              </label>
+            );
+          })}
         </div>
       </div>
 

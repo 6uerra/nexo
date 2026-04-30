@@ -6,6 +6,14 @@ import { formatDate } from '@/lib/utils';
 import { ClientDetailActions } from './actions';
 import { PlanSwitcher } from './plan-switcher';
 import { SubscriptionTester } from './subscription-tester';
+import { MODULE_LABELS, type ModuleKey } from '@nexo/shared';
+
+const PLAN_LABEL: Record<string, string> = {
+  free_trial: 'Trial',
+  standard: 'Standard',
+  pro: 'Pro',
+  enterprise: 'Enterprise',
+};
 
 async function load(id: string) {
   const c = await cookies();
@@ -46,7 +54,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card p-5">
           <p className="text-xs text-muted uppercase tracking-wider font-semibold">Plan</p>
-          <p className="mt-2 text-2xl font-bold capitalize">{sub?.plan?.replace('_', ' ') ?? '—'}</p>
+          <p className="mt-2 text-2xl font-bold">{sub?.plan ? (PLAN_LABEL[sub.plan] ?? sub.plan) : '—'}</p>
           <p className="mt-1 text-xs text-muted">Estado: <strong>{sub?.status ?? '—'}</strong></p>
         </div>
         <div className="card p-5">
@@ -108,10 +116,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 }
 
 function ModuleToggle({ clientId, module }: { clientId: string; module: any }) {
+  const meta = MODULE_LABELS[module.moduleKey as ModuleKey];
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div>
-        <p className="font-medium text-sm capitalize">{module.moduleKey}</p>
+        <p className="font-medium text-sm">{meta?.label ?? module.moduleKey}</p>
+        {meta?.desc && <p className="text-xs text-muted">{meta.desc}</p>}
       </div>
       <ClientDetailActions clientId={clientId} inlineToggle={module} />
     </div>

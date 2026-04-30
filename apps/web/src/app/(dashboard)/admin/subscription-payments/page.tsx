@@ -22,6 +22,14 @@ type Payment = {
   rejectionReason: string | null;
 };
 
+const METHOD_LABEL: Record<string, string> = {
+  qr: 'QR',
+  bank_transfer: 'Transferencia bancaria',
+  mercado_pago: 'Mercado Pago',
+  cash: 'Efectivo',
+  other: 'Otro',
+};
+
 const STATUS_BADGE: Record<string, { label: string; color: string; icon: any }> = {
   submitted: { label: 'Pendiente', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: Clock },
   verified:  { label: 'Verificado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
@@ -132,7 +140,7 @@ export default function SubscriptionPaymentsPage() {
                         </Link>
                       </td>
                       <td className="px-4 py-2.5 tabular-nums font-bold">{formatCop(p.amountCop)}</td>
-                      <td className="px-4 py-2.5 text-xs capitalize">{p.method.replace('_', ' ')}</td>
+                      <td className="px-4 py-2.5 text-xs">{METHOD_LABEL[p.method] ?? p.method}</td>
                       <td className="px-4 py-2.5 text-xs tabular-nums">{formatDate(p.coversFrom)} → {formatDate(p.coversTo)}</td>
                       <td className="px-4 py-2.5 text-xs font-mono">{p.reference ?? '—'}</td>
                       <td className="px-4 py-2.5">

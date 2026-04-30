@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles, RefreshCcw } from 'lucide-react';
 import { api } from '@/lib/api';
+import { MODULE_LABELS, type ModuleKey } from '@nexo/shared';
 
 type Plan = { id: string; key: string; name: string; modules: string[] };
 
@@ -73,9 +74,12 @@ export function PlanSwitcher({ clientId, currentPlan }: { clientId: string; curr
         <div className="rounded-lg bg-background p-3 text-xs">
           <p className="font-semibold text-ink mb-1">Módulos del plan {planObj.name}:</p>
           <div className="flex flex-wrap gap-1">
-            {planObj.modules.map((m) => (
-              <span key={m} className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-primary">{m}</span>
-            ))}
+            {planObj.modules.map((m) => {
+              const label = MODULE_LABELS[m as ModuleKey]?.label ?? m;
+              return (
+                <span key={m} className="rounded-md bg-primary/10 px-2 py-0.5 text-primary font-medium">{label}</span>
+              );
+            })}
           </div>
         </div>
       )}

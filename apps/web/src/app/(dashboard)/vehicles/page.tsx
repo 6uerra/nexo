@@ -1,58 +1,130 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { Truck } from 'lucide-react';
-import { MediaCapture, type MediaItem } from '@/components/media-capture';
-import { api } from '@/lib/api';
+import { cookies } from 'next/headers';
+import { Truck, Lock } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+import { expiryDot } from '@/lib/expiry';
+import { LimitBanner } from '@/components/limit-banner';
 
-/**
- * Sprint 1 incluye un demo funcional de captura de fotos/videos.
- * El CRUD completo de vehículos llega en Sprint 2.
- */
-export default function VehiclesPage() {
-  const [items, setItems] = useState<MediaItem[]>([]);
+async function fetchAll() {
+  const c = await cookies();
+  const token = c.get(process.env.SESSION_COOKIE_NAME ?? 'nexo_session')?.value;
+  const apiUrl = process.env.API_URL ?? 'http://localhost:3001';
+  const headers = { cookie: `${process.env.SESSION_COOKIE_NAME ?? 'nexo_session'}=${token}` };
+  const [vRes, sRes] = await Promise.all([
+    fetch(`${apiUrl}/api/v1/vehicles`, { headers, cache: 'no-store' }),
+    fetch(`${apiUrl}/api/v1/subscriptions/me`, { headers, cache: 'no-store' }),
+  ]);
+  const vData = vRes.ok ? await vRes.json() : { vehicles: [] };
+  const sData = sRes.ok ? await sRes.json().catch(() => null) : null;
+  return {
+    vehicles: vData.vehicles as any[],
+    vehicleLimit: sData?.plan?.vehicleLimit ?? null,
+    planName: sData?.plan?.name ?? null,
+  };
+}
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await api<{ media: MediaItem[] }>('/media?entityType=vehicle-demo');
-        setItems(r.media);
-      } catch {}
-    })();
-  }, []);
+const TYPE_LABEL: Record<string, string> = {
+  car_4x4: '4x4', sedan: 'Sedán', minivan: 'Minivan', bus: 'Bus', truck: 'Camión', pickup: 'Pickup', other: 'Otro',
+};
+
+export default async function VehiclesPage() {
+  const { vehicles, vehicleLimit, planName } = await fetchAll();
+  const items = vehicles.map((v, i) => ({
+    ...v,
+    blockedByPlan: vehicleLimit !== null && vehicleLimit !== undefined && i >= vehicleLimit,
+  }));
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <header className="flex items-center gap-3">
-        <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-          <Truck className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Vehículos</h1>
-          <p className="text-sm text-muted">CRUD completo en Sprint 2 · Captura de fotos y videos disponible aquí.</p>
-        </div>
+    <div className="max-w-6xl space-y-5">
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <Truck className="h-6 w-6 text-primary" />
+          Vehículos
+          <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted">{vehicles.length}</span>
+        </h1>
+        <p className="text-sm text-muted">Listado con estado de vencimiento de SOAT, RTM y póliza.</p>
       </header>
 
-      <section className="card p-6">
-        <h2 className="font-semibold">Captura de evidencia</h2>
-        <p className="mt-1 text-sm text-muted">
-          Tomate fotos del vehículo o sube desde tu galería. Para vehículos puedes también grabar/importar videos.
-        </p>
-        <div className="mt-4">
-          <MediaCapture
-            entityType="vehicle-demo"
-            kinds={['image', 'video']}
-            label="Demo vehículo"
-            initial={items}
-            onChange={setItems}
-          />
-        </div>
-      </section>
+      <LimitBanner resource="vehículos" used={vehicles.length} limit={vehicleLimit} />
 
-      <section className="card p-6 bg-primary/5 border-primary/20">
-        <p className="text-sm">
-          <strong>¿Cómo se ve en el celular?</strong> Abre <code className="rounded bg-white px-1.5 py-0.5 text-xs">http://&lt;tu-ip&gt;:3000/vehicles</code> desde tu teléfono y los botones de cámara abrirán la cámara nativa.
-        </p>
-      </section>
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-background text-left text-xs uppercase tracking-wider text-muted">
+              <tr>
+                <th className="px-4 py-2.5">Placa</th>
+                <th>Vehículo</th>
+                <th>Propietario</th>
+                <th>SOAT</th>
+                <th>Tecnomec.</th>
+                <th>Póliza</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {items.length === 0 && (
+                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted">Sin vehículos aún</td></tr>
+              )}
+              {items.map((v) => {
+                const soat = expiryDot(v.soatExpiresAt);
+                const rtm = expiryDot(v.rtmExpiresAt);
+                const ins = expiryDot(v.insuranceExpiresAt);
+                return (
+                  <tr key={v.id} className={v.blockedByPlan ? 'opacity-50 bg-amber-50/30 hover:bg-amber-50/50' : 'hover:bg-background/50'}>
+                    <td className="px-4 py-2.5">
+                      <span className="font-mono font-bold tabular-nums inline-flex items-center gap-1.5">
+                        {v.plate}
+                        {v.blockedByPlan && <Lock className="h-3 w-3 text-amber-600" />}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <p className="font-medium">{v.brand} {v.model}</p>
+                      <p className="text-xs text-muted">{TYPE_LABEL[v.type] ?? v.type} · {v.year} · {v.color}</p>
+                    </td>
+                    <td className="px-4 py-2.5 text-xs">{v.ownerName ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-xs">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${soat.color}`} />
+                        <span className="tabular-nums">{v.soatExpiresAt ? formatDate(v.soatExpiresAt) : '—'}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-xs">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${rtm.color}`} />
+                        <span className="tabular-nums">{v.rtmExpiresAt ? formatDate(v.rtmExpiresAt) : '—'}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-xs">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${ins.color}`} />
+                        <span className="tabular-nums">{v.insuranceExpiresAt ? formatDate(v.insuranceExpiresAt) : '—'}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {v.blockedByPlan ? (
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
+                          Bloqueado
+                        </span>
+                      ) : (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          v.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
+                          v.status === 'maintenance' ? 'bg-amber-50 text-amber-700' :
+                          v.status === 'inactive' ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700'
+                        }`}>
+                          {v.status === 'active' ? 'Activo' : v.status === 'maintenance' ? 'Mantenim.' : v.status === 'inactive' ? 'Inactivo' : 'Vendido'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {planName && (
+        <p className="text-xs text-muted">Plan actual del cliente: <strong>{planName}</strong></p>
+      )}
     </div>
   );
 }

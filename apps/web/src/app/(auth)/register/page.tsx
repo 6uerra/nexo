@@ -22,10 +22,38 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   function onChange<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-    if (k === 'tenantName' && typeof v === 'string' && !form.tenantSlug) {
-      const slug = v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 64);
-      setForm((f) => ({ ...f, tenantSlug: slug }));
+    setForm((f) => {
+      const next = { ...f, [k]: v };
+      if (k === 'tenantName' && typeof v === 'string') {
+        next.tenantSlug = slugify(v);
+      }
+      return next;
+    });
+  }
+
+  function slugify(s: string): string {
+    return s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 64) || 'cuenta';
+  }
+
+  async function trySubmit(payload: typeof form, attempt = 0): Promise<void> {
+    const tryPayload = attempt === 0
+      ? payload
+      : { ...payload, tenantSlug: `${payload.tenantSlug}-${Math.floor(Math.random() * 9000) + 1000}` };
+    try {
+      await api<{ session: AuthSession }>('/auth/register', { method: 'POST', json: tryPayload });
+      router.push('/onboarding');
+    } catch (e: any) {
+      // Si el slug ya existe, reintentar una vez con sufijo aleatorio (transparente para el usuario)
+      if (attempt === 0 && e?.status === 409 && /identificador|slug|empresa/i.test(e?.message ?? '')) {
+        return trySubmit(payload, 1);
+      }
+      throw e;
     }
   }
 
@@ -39,8 +67,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const r = await api<{ session: AuthSession }>('/auth/register', { method: 'POST', json: parsed.data });
-      router.push('/onboarding');
+      await trySubmit(parsed.data);
     } catch (e: any) {
       setError(e?.message ?? 'Error al crear cuenta');
     } finally {
@@ -61,39 +88,29 @@ export default function RegisterPage() {
           <p className="mt-1 text-sm text-muted">30 días gratis · Sin tarjeta</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="label">Nombre del intermediario</label>
-                <input className="input" required value={form.tenantName}
-                  onChange={(e) => onChange('tenantName', e.target.value)}
-                  placeholder="Flotas del Norte" />
-              </div>
-              <div>
-                <label className="label">Identificador (URL)</label>
-                <input className="input" required value={form.tenantSlug}
-                  onChange={(e) => onChange('tenantSlug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  placeholder="flotas-norte" />
-              </div>
+            <div>
+              <label className="label">Nombre de tu empresa</label>
+              <input className="input" required value={form.tenantName}
+                onChange={(e) => onChange('tenantName', e.target.value)}
+                placeholder="Tu empresa" autoComplete="organization" />
             </div>
             <div>
               <label className="label">Tu nombre</label>
               <input className="input" required value={form.adminName}
                 onChange={(e) => onChange('adminName', e.target.value)}
-                placeholder="Camilo Pérez" />
+                placeholder="Tu nombre completo" autoComplete="name" />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="label">Correo</label>
-                <input className="input" type="email" required value={form.email}
-                  onChange={(e) => onChange('email', e.target.value)}
-                  placeholder="tu@empresa.com" />
-              </div>
-              <div>
-                <label className="label">Contraseña</label>
-                <input className="input" type="password" required value={form.password}
-                  onChange={(e) => onChange('password', e.target.value)}
-                  placeholder="Mínimo 8 caracteres" />
-              </div>
+            <div>
+              <label className="label">Correo</label>
+              <input className="input" type="email" required value={form.email}
+                onChange={(e) => onChange('email', e.target.value)}
+                placeholder="tu@correo.com" autoComplete="email" />
+            </div>
+            <div>
+              <label className="label">Contraseña</label>
+              <input className="input" type="password" required value={form.password}
+                onChange={(e) => onChange('password', e.target.value)}
+                placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
             </div>
 
             <div className="space-y-2 pt-2">

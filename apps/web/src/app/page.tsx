@@ -6,20 +6,20 @@ import {
 } from 'lucide-react';
 
 const FEATURES = [
-  { icon: Truck, title: 'Gestión de vehículos', desc: 'Clasifica vehículos, sube documentos y controla SOAT, RTM y vencimientos en un calendario unificado.' },
-  { icon: ShieldCheck, title: 'Propietarios y conductores', desc: 'Centraliza datos legales, seguridad social y licencias. Vincula conductores con vehículos al instante.' },
-  { icon: FileSignature, title: 'Contratos y prospectos', desc: 'Genera contratos PDF en segundos. Lista vehículos disponibles para nuevas oportunidades.' },
-  { icon: Wrench, title: 'Mantenimientos', desc: 'Registra fechas y kilometraje. Las deducciones se aplican automáticamente al pago del propietario.' },
-  { icon: Receipt, title: 'Facturación cruzada', desc: 'Cobros a clientes y pagos a propietarios con deducciones automáticas. Reportes exportables.' },
-  { icon: Bell, title: 'Alertas inteligentes', desc: 'Notificaciones por email e in-app antes de cada vencimiento. Tú decides los días de anticipación.' },
+  { icon: Truck, title: 'Tus vehículos, organizados', desc: 'Clasifica, sube fotos y controla SOAT, tecnomecánica y demás documentos. Todo en un solo calendario.' },
+  { icon: ShieldCheck, title: 'Propietarios y conductores', desc: 'Datos legales, licencias y seguridad social siempre a la mano. Vincula y asigna en segundos.' },
+  { icon: FileSignature, title: 'Contratos al instante', desc: 'Genera contratos en PDF con un clic. Mantén un historial limpio y firmable.' },
+  { icon: Wrench, title: 'Mantenimientos sin pelear', desc: 'Por fecha o por kilometraje. Los gastos se descuentan solos del próximo pago al propietario.' },
+  { icon: Receipt, title: 'Cobros y pagos en orden', desc: 'Cobra a tus clientes, paga a tus propietarios y mira la rentabilidad por vehículo.' },
+  { icon: Bell, title: 'Avisos antes de que duela', desc: 'Recibe alertas por correo y dentro de la app antes de cada vencimiento o pago.' },
 ];
 
 const BENEFITS = [
-  'Multi-tenant: gestiona varios intermediarios desde una sola plataforma',
-  'Diseñado mobile-first para usar desde cualquier celular',
-  'Habeas Data y políticas de tratamiento conformes a la ley 1581/2012',
-  'Stack moderno: Next.js, NestJS, PostgreSQL — open source y self-hosted',
-  'Sin cargos por vehículo: paga una suscripción mensual fija',
+  'Funciona desde el celular como una app — sin instalar nada',
+  'Activa solo los módulos que vas a usar',
+  'Tus datos protegidos según la Ley 1581 (Habeas Data)',
+  'Tecnología moderna y abierta: tu información es tuya',
+  'Una suscripción mensual, sin sorpresas ni cobros por vehículo',
 ];
 
 export default function LandingPage() {
@@ -48,16 +48,16 @@ export default function LandingPage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Nuevo · 30 días de prueba sin tarjeta
+                Nuevo · 30 días gratis sin tarjeta
               </span>
               <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
-                Conecta tu flota. <br />
-                <span className="text-primary">Simplifica</span> el negocio.
+                Tus vehículos, ordenados. <br />
+                Tu negocio, <span className="text-primary">tranquilo</span>.
               </h1>
               <p className="mt-5 text-lg text-muted leading-relaxed max-w-xl">
-                Nexo es la plataforma para administradores intermediarios de flotas:
-                centraliza vehículos, propietarios, conductores y contratos.
-                Factura, paga y notifica vencimientos sin esfuerzo.
+                Nexo reúne vehículos, propietarios, conductores, contratos y pagos
+                en un solo lugar. Tú te concentras en hacer crecer el negocio,
+                Nexo se encarga del resto.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/register" className="btn-accent text-base px-6 py-3">
@@ -120,8 +120,8 @@ export default function LandingPage() {
       <section id="features" className="bg-surface py-20 border-y border-border">
         <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Todo lo que tu operación necesita</h2>
-            <p className="mt-4 text-muted">Desde el primer vehículo hasta la facturación mensual, todo en un solo lugar.</p>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Todo lo que necesitas, en su sitio</h2>
+            <p className="mt-4 text-muted">Del primer vehículo a la última factura del mes — sin Excels, sin recordatorios mentales.</p>
           </div>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
@@ -140,7 +140,7 @@ export default function LandingPage() {
       {/* Benefits */}
       <section id="benefits" className="py-20">
         <div className="mx-auto max-w-4xl px-4 lg:px-6">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-center">Construido para intermediarios serios</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-center">Pensado para que crezcas tranquilo</h2>
           <ul className="mt-10 space-y-3 max-w-2xl mx-auto">
             {BENEFITS.map((b) => (
               <li key={b} className="flex items-start gap-3 rounded-lg bg-surface border border-border p-4">
@@ -155,7 +155,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section id="pricing" className="bg-primary py-20 text-white">
         <div className="mx-auto max-w-4xl px-4 lg:px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Empieza hoy. Tu flota lo agradecerá.</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Empieza hoy. Tu yo del próximo mes te lo va a agradecer.</h2>
           <p className="mt-4 text-primary-100/90">30 días gratis. Sin tarjeta. Cancela cuando quieras.</p>
           <div className="mt-8 flex justify-center">
             <Link href="/register" className="btn-accent text-base px-8 py-3.5">

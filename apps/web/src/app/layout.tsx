@@ -2,16 +2,22 @@ import type { Metadata } from 'next';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Nexo — Conecta tu flota. Simplifica el negocio.',
-  description: 'Plataforma SaaS para administradores intermediarios de flotas. Vehículos, propietarios, conductores, contratos y facturación cruzada en un solo lugar.',
+  title: 'Nexo — Gestiona tus vehículos. Simplifica tu operación.',
+  description: 'Centraliza vehículos, propietarios, conductores, contratos y pagos en un solo lugar. Sin complicaciones.',
   icons: {
     icon: '/favicon.svg',
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#2563EB',
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -20,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

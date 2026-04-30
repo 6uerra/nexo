@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { NavSidebar } from '@/components/nav-sidebar';
 import { NavMobile } from '@/components/nav-mobile';
 import { Topbar } from '@/components/topbar';
+import { MODULE_KEYS } from '@nexo/shared';
 
 async function getServerSession() {
   const c = await cookies();
@@ -41,7 +42,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!data) redirect('/login');
   const c = await cookies();
   const token = c.get(process.env.SESSION_COOKIE_NAME ?? 'nexo_session')?.value ?? '';
-  const enabledModules = await getEnabledModules(token);
+
+  // El Admin tiene control total: nada bloqueado, todos los módulos visibles.
+  const enabledModules = data.session.role === 'super_admin'
+    ? [...MODULE_KEYS]
+    : await getEnabledModules(token);
 
   return (
     <div className="flex min-h-screen bg-background">

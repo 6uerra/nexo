@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Gate de calidad antes de push: corre toda la suite de tests.
+# Si algo falla (exit != 0), el push se aborta.
+echo "🚦 Pre-push gate: corriendo suite completa de tests…"
+bash "$(dirname "$0")/../scripts/test-all.sh"

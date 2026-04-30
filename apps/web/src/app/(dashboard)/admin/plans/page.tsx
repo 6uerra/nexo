@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Loader2, Plus, Save, Trash2, Star, Brain, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { api } from '@/lib/api';
+import { MODULE_LABELS, type ModuleKey } from '@nexo/shared';
 
 type Plan = {
   id: string;
@@ -98,8 +99,18 @@ function PlanEditor({
 }: { plan: Plan; onSave: (p: Plan) => Promise<void>; onDelete: (id: string) => Promise<void>; saving: boolean }) {
   const [p, setP] = useState<Plan>(plan);
   const [highlightsText, setHighlightsText] = useState((plan.highlights ?? []).join('\n'));
+  const dirtyRef = useRef(false);
+
+  // Sincroniza desde props si la prop cambia y NO hay edición pendiente local
+  useEffect(() => {
+    if (!dirtyRef.current) {
+      setP(plan);
+      setHighlightsText((plan.highlights ?? []).join('\n'));
+    }
+  }, [plan]);
 
   function set<K extends keyof Plan>(k: K, v: Plan[K]) {
+    dirtyRef.current = true;
     setP((prev) => ({ ...prev, [k]: v }));
   }
 
@@ -212,7 +223,11 @@ function PlanEditor({
         <button type="button" onClick={() => onDelete(p.id)} className="btn-ghost text-sm text-red-600">
           <Trash2 className="h-4 w-4" /> Eliminar
         </button>
-        <button type="button" onClick={() => { commitHighlights(); onSave({ ...p, highlights: highlightsText.split('\n').map((l) => l.trim()).filter(Boolean) }); }}
+        <button type="button" onClick={async () => {
+          commitHighlights();
+          await onSave({ ...p, highlights: highlightsText.split('\n').map((l) => l.trim()).filter(Boolean) });
+          dirtyRef.current = false;
+        }}
           disabled={saving} className="btn-primary text-sm">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Guardar

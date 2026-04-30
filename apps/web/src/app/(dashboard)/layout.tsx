@@ -1,9 +1,12 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { LogOut } from 'lucide-react';
 import { NavSidebar } from '@/components/nav-sidebar';
 import { NavMobile } from '@/components/nav-mobile';
 import { Topbar } from '@/components/topbar';
 import { SubscriptionStatusBanner } from '@/components/subscription-status-banner';
+import { Logo } from '@/components/logo';
 import { MODULE_KEYS } from '@nexo/shared';
 
 async function getServerSession() {
@@ -53,19 +56,45 @@ async function getSubscription(token: string) {
   }
 }
 
+function isBlocked(sub: any): boolean {
+  if (!sub) return false;
+  if (sub.status === 'blocked' || sub.status === 'cancelled') return true;
+  if (sub.blockAt && new Date(sub.blockAt) < new Date()) return true;
+  return false;
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const data = await getServerSession();
   if (!data) redirect('/login');
   const c = await cookies();
   const token = c.get(process.env.SESSION_COOKIE_NAME ?? 'nexo_session')?.value ?? '';
-
   const isAdmin = data.session.role === 'super_admin';
 
-  // El Admin tiene control total: nada bloqueado, todos los módulos visibles.
   const enabledModules = isAdmin ? [...MODULE_KEYS] : await getEnabledModules(token);
-
-  // Banner persistente con estado de suscripción (sólo para clientes)
   const subscription = isAdmin ? null : await getSubscription(token);
+  const blocked = !isAdmin && isBlocked(subscription);
+
+  // Cuando el cliente está bloqueado: layout minimalista (solo header con logo + logout).
+  // Sin sidebar de operación. Ya el middleware bloqueó las rutas, pero por si acaso.
+  if (blocked) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="border-b border-border bg-surface">
+          <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 lg:px-6">
+            <Logo />
+            <form action="/api/v1/auth/logout" method="post">
+              <button type="submit" className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink hover:bg-background cursor-pointer">
+                <LogOut className="h-3.5 w-3.5" />
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
+        </header>
+        <SubscriptionStatusBanner subscription={subscription} />
+        <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-8 lg:px-6">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

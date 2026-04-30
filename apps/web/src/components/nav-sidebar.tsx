@@ -25,6 +25,8 @@ const CLIENT_NAV: NavItem[] = [
   { href: '/contracts', label: 'Contratos', icon: FileText, module: 'contracts' },
   { href: '/maintenance', label: 'Mantenimiento', icon: Wrench, module: 'maintenance' },
   { href: '/billing', label: 'Facturación', icon: Receipt, module: 'billing' },
+  { href: '/reports', label: 'Reportes', icon: BarChart3, module: 'reports' },
+  { href: '/prospects', label: 'Prospectos', icon: Sparkles, module: 'prospects' },
   { href: '/notifications', label: 'Notificaciones', icon: Bell, module: null },
 ];
 

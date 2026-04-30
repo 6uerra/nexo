@@ -23,3 +23,7 @@ minio-data/
 uploads/
 tmp/
 *.tsbuildinfo
+apps/web/.features-gen/
+apps/web/playwright-report/
+apps/web/test-results/
+reports/

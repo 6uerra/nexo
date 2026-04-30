@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarPlus, Mail, RotateCcw } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { ClientDetailActions } from './actions';
 import { PlanSwitcher } from './plan-switcher';
+import { SubscriptionTester } from './subscription-tester';
 
 async function load(id: string) {
   const c = await cookies();
@@ -61,6 +62,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <PlanSwitcher clientId={id} currentPlan={sub?.plan ?? null} />
+
+      <SubscriptionTester clientId={id} />
 
       <ClientDetailActions clientId={id} />
 

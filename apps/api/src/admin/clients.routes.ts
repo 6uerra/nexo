@@ -215,6 +215,35 @@ export async function registerAdminClientsRoutes(app: FastifyInstance) {
     return { ok: true, planKey: plan.key, planName: plan.name, modulesEnabled: planMods.size };
   });
 
+  // Aplicar preset al estado de la suscripción (para probar bloqueos)
+  app.post('/admin/clients/:id/set-subscription', { preHandler: [authMiddleware, requireRole('super_admin')] }, async (req) => {
+    const { id } = req.params as { id: string };
+    const body = z.object({
+      preset: z.enum(['active', 'expiring_soon', 'past_due', 'blocked']),
+    }).parse(req.body);
+    const db = getDb();
+    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.tenantId, id)).limit(1);
+    if (!sub) throw new HttpError(404, 'Sin suscripción');
+    const now = new Date();
+    const day = 24 * 60 * 60 * 1000;
+    let update: Partial<typeof sub> = { updatedAt: now };
+    if (body.preset === 'active') {
+      const end = new Date(now.getTime() + 30 * day);
+      update = { ...update, status: 'active', currentPeriodEnd: end, blockAt: new Date(end.getTime() + 90 * day) };
+    } else if (body.preset === 'expiring_soon') {
+      const end = new Date(now.getTime() + 5 * day);
+      update = { ...update, status: 'past_due', currentPeriodEnd: end, blockAt: new Date(end.getTime() + 90 * day) };
+    } else if (body.preset === 'past_due') {
+      const end = new Date(now.getTime() - 30 * day);
+      update = { ...update, status: 'past_due', currentPeriodEnd: end, blockAt: new Date(end.getTime() + 90 * day) };
+    } else if (body.preset === 'blocked') {
+      const end = new Date(now.getTime() - 100 * day);
+      update = { ...update, status: 'blocked', currentPeriodEnd: end, blockAt: new Date(now.getTime() - day) };
+    }
+    await db.update(subscriptions).set(update as any).where(eq(subscriptions.id, sub.id));
+    return { ok: true, preset: body.preset };
+  });
+
   // Activar / desactivar tenant
   app.post('/admin/clients/:id/toggle-active', { preHandler: [authMiddleware, requireRole('super_admin')] }, async (req) => {
     const { id } = req.params as { id: string };
